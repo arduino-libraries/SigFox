@@ -30,39 +30,47 @@
 #define SIGFOX_h
 
 #include <Arduino.h>
-
-#define RFPWR  31            
-#define NRES   30            // Arduino pin for module reset
-#define NEVENT 33            // Arduino pin for module event interrupt
-#define SPI_PORT    SPI1
-
-#undef SS
-#define SS     SDCARD_SS_PIN
-
-#define LED1  6 //LED_BUILTIN
+#include <SPI.h>
 
 #define BLEN  64            // Communication buffer length
+
+typedef enum country {
+  US = 0 ,
+  EU
+} Country;
+
+typedef enum communication {
+  TX = 0 ,
+  TXRX
+} TxRxMode;
 
 class SIGFOXClass
 {
   public:
-  
+
+  /*
+  * Enables debug LED and prints
+  */
+  void debug(bool on);
   /*
   * Initialize module (ready to transmit)
-  */  
-  int begin();
+  */
+  int begin(bool configured = false);
+    /*
+  * Initialize module specifying SPI port and pins (ready to transmit)
+  */
+  int begin(SPIClass& spi, int reset, int poweron, int interrupt, int chip_select, int led);
   /*
   * Send null terminated string as message to SIGFOX network
   * Max 12 characters long  
   * Return SIGFOX status code
-  */  
-  int sendMessage(char mess[]);
+  */
+  int send(char mess[]);
   /*
   * Send an array of bytes (max 12 bytes long) as message to SIGFOX network
   * Return SIGFOX status code
-  */  
-  int sendMessage(unsigned char mess[],int len);
-  
+  */
+  int send(unsigned char mess[],int len);
   /*
   * Read status (fill ssm,atm,sig status variables)
   */
@@ -70,53 +78,53 @@ class SIGFOXClass
   /*
   * Return status code.
   * Type: 0 -> ssm status ; 1 -> atm status ; 2 -> sigfox status    
-  */  
+  */
   int getStatusCode(byte type);
   /*
   * Return atm status message 
-  */  
+  */
   char* getStatusAtm();
   /*
   * Return SIGFOX status message
-  */  
+  */
   char* getStatusSig();
   /*
   * Return ATM version (major ver,minor ver)(two bytes)
-  */  
+  */
   unsigned char* getAtmVersion();
   /*
   * Return SIGFOX version (major ver, minor ver) (two bytes)
-  */  
+  */
   unsigned char* getSigVersion();
   /*
   * Return ID (4 bytes)
-  */  
+  */
   unsigned char* getID();
   /*
   * Return PAC (16 bytes)
-  */  
+  */
   unsigned char* getPAC();
   /*
   * Reset module
-  */  
+  */
   void reset();
 
   void getTemperatureInternal();
 
-  void setEUMode();
+  void setMode(Country EUMode, TxRxMode tx_rx);
 
   int calibrateCrystal();
   /*
   * Test mode
-  */  
+  */
   void testMode(byte frameL,byte frameH, byte chanL,byte chanH);
   /*
   *  Disable module
-  */  
+  */
   void end();
 
   char* readConfig(int* len);
-  
+
   private:
 
   byte ssm;
@@ -133,7 +141,13 @@ class SIGFOXClass
   uint8_t configuration;
   uint8_t repeat;
   unsigned char buffer[BLEN];  // module communication buffer
-
+  SPIClass& spi_port = SPI;
+  int reset_pin;
+  int poweron_pin;
+  int interrupt_pin;
+  int chip_select_pin;
+  int led_pin;
+  bool debugging = false;
 };
 
 extern SIGFOXClass SigFox;

@@ -48,94 +48,119 @@ const char str13[] = "Timeout interrupt no transmission";
 const char * sigstr[14]  =        // SIGFOX message status
 {str0, str1, str2, str3, str4, str5, str6, str7, str8, str9, str10, str11, str12, str13};
 
-#define SPICONFIG   SPISettings(300000UL, MSBFIRST, SPI_MODE0)
+#define SPICONFIG   SPISettings(100000UL, MSBFIRST, SPI_MODE0)
 
-int SIGFOXClass::begin()
+void SIGFOXClass::debug(bool on) {
+  // Enables debug via LED and Serial prints
+  // Also disables greedy sleep strategy
+  debugging = on;
+  if (debugging) {
+    pinMode(led_pin, OUTPUT);
+  }
+}
+
+int SIGFOXClass::begin(bool configured)
 {
-  buffer[0] = 0;
-  pinMode(NEVENT, INPUT_PULLUP);
-  pinMode(RFPWR, OUTPUT);
-  pinMode(LED1, OUTPUT);
-  digitalWrite(RFPWR, HIGH);
-  pinMode(SS, OUTPUT);
-  pinMode(NRES, OUTPUT);
-  digitalWrite(NRES, HIGH);
-  delay(10);
-  digitalWrite(NRES, LOW);
-  delay(10);
-  digitalWrite(NRES, HIGH);
-  SPI_PORT.begin();
-  SPI_PORT.setDataMode(SPI_MODE0);
-  SPI_PORT.setBitOrder(MSBFIRST);
+#ifdef SIGFOX_SPI
+  spi_port = SIGFOX_SPI;
+  reset_pin = SIGFOX_RES_PIN;
+  poweron_pin = SIGFOX_PWRON_PIN;
+  interrupt_pin = SIGFOX_EVENT_PIN;
+  chip_select_pin = SIGFOX_SS_PIN;
+  led_pin = LED_BUILTIN;
+#else
+  // begin() can only be used on boards with embedded Sigfox module
+  if (configured == false) {
+    return false;
+  }
+#endif
 
-  unsigned char *buff=getSigVersion();
-  if ((buff[0]|buff[1])==0) 
+  pinMode(interrupt_pin, INPUT_PULLUP);
+  pinMode(poweron_pin, OUTPUT);
+  digitalWrite(poweron_pin, HIGH);
+  pinMode(chip_select_pin, OUTPUT);
+  digitalWrite(chip_select_pin, HIGH);
+  pinMode(reset_pin, OUTPUT);
+  // Power cycle the chip
+  digitalWrite(reset_pin, HIGH);
+  delay(10);
+  digitalWrite(reset_pin, LOW);
+  delay(10);
+  digitalWrite(reset_pin, HIGH);
+  spi_port.begin();
+  spi_port.setDataMode(SPI_MODE0);
+  spi_port.setBitOrder(MSBFIRST);
+
+  delay(30);
+
+  unsigned char *buff = getSigVersion();
+  if (((buff[0] | buff[1]) == 0) || (buff[0] == 0xFF))
     return false;
   return true;
 }
 
-int SIGFOXClass::sendMessage(char mess[])
+int SIGFOXClass::begin(SPIClass& spi, int reset, int poweron, int interrupt, int chip_select, int led)
 {
-  int len = strlen(mess);
-  return sendMessage((unsigned char*)mess, len);
+  spi_port = spi;
+  reset_pin = reset;
+  poweron_pin = poweron;
+  interrupt_pin = interrupt;
+  chip_select_pin = chip_select;
+  led_pin = led;
+
+  return begin(true);
 }
 
-int SIGFOXClass::sendMessage(unsigned char mess[], int len)
+int SIGFOXClass::send(char mess[])
+{
+  int len = strlen(mess);
+  return send((unsigned char*)mess, len);
+}
+
+int SIGFOXClass::send(unsigned char mess[], int len)
 {
   if (len == 0) return -1;
-  getStatus();             //reset NNEVENT
+  getStatus();
 
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
   delay(1);
   
-  SPI_PORT.beginTransaction(SPICONFIG);
+  spi_port.beginTransaction(SPICONFIG);
   if (len > 12) len = 12;
   int i = 0;
   
-  SPI_PORT.transfer(0x07);
-  SPI_PORT.transfer(len);
+  spi_port.transfer(0x07);
+  spi_port.transfer(len);
   for (i = 0; i < len; i++) {
-    SPI_PORT.transfer((uint8_t)mess[i]);
+    spi_port.transfer((uint8_t)mess[i]);
   }
-  SPI_PORT.endTransaction();
+  spi_port.endTransaction();
 
-  digitalWrite(SS, HIGH);
-  delay(5);
-  digitalWrite(SS, LOW);
-
-  SPI_PORT.transfer(0x07);
-  SPI_PORT.transfer(len);
-  for (i = 0; i < len; i++) {
-    SPI_PORT.transfer((uint8_t)mess[i]);
-  }
-  SPI_PORT.endTransaction();
-  
-  delay(1);
-  digitalWrite(SS, HIGH);
+  digitalWrite(chip_select_pin, HIGH);
 
   delay(5);
   calibrateCrystal();
   delay(5);
 
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
   delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x0D);
-  SPI_PORT.endTransaction();
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x0D);
+  spi_port.endTransaction();
   delay(1);
-  digitalWrite(SS, HIGH);
+  digitalWrite(chip_select_pin, HIGH);
   int ret = 99;
   for (i = 0; i < 60000; i++)
   {
-    if (digitalRead(NEVENT) == 0) {
+    if (digitalRead(interrupt_pin) == 0) {
       getStatus();
       ret = getStatusCode(2);
       break;
     }
     else {
-      digitalWrite(LED1, HIGH);
+      digitalWrite(led_pin, HIGH);
       delay(50);
-      digitalWrite(LED1, LOW);
+      digitalWrite(led_pin, LOW);
       delay(50);
     }
   }
@@ -144,25 +169,25 @@ int SIGFOXClass::sendMessage(unsigned char mess[], int len)
 }
 
 int SIGFOXClass::calibrateCrystal() {
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
   delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x14);
-  SPI_PORT.endTransaction();
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x14);
+  spi_port.endTransaction();
   delay(1);
-  digitalWrite(SS, HIGH);
+  digitalWrite(chip_select_pin, HIGH);
   int ret = 99;
   for (int i = 0; i < 6000; i++)
   {
-    if (digitalRead(NEVENT) == 0) {
+    if (digitalRead(interrupt_pin) == 0) {
       getStatus();
       ret = getStatusCode(2);
       break;
     }
     else {
-      digitalWrite(LED1, HIGH);
+      digitalWrite(led_pin, HIGH);
       delay(50);
-      digitalWrite(LED1, LOW);
+      digitalWrite(led_pin, LOW);
       delay(50);
     }
   }
@@ -219,56 +244,51 @@ char* SIGFOXClass::getStatusSig()
 
 void SIGFOXClass::getStatus()
 {
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x0A);
+  spi_port.transfer(0);
+  ssm = spi_port.transfer(0);
+  atm = spi_port.transfer(0);
+  sig = spi_port.transfer(0);
+  sig2 = spi_port.transfer(0);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
   delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x0A);
-  SPI_PORT.transfer(0);
-  ssm = SPI_PORT.transfer(0);
-  atm = SPI_PORT.transfer(0);
-  sig = SPI_PORT.transfer(0);
-  sig2 = SPI_PORT.transfer(0);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
 }
 
 void SIGFOXClass::getTemperatureInternal()
 {
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x13);
+  spi_port.transfer(0);
+  vhidle = spi_port.transfer(0);
+  vlidle = spi_port.transfer(0);
+  vhactive = spi_port.transfer(0);
+  vlactive = spi_port.transfer(0);
+  temperatureL = spi_port.transfer(0);
+  temperatureH = spi_port.transfer(0);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
   delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x13);
-  SPI_PORT.transfer(0);
-  vhidle = SPI_PORT.transfer(0);
-  vlidle = SPI_PORT.transfer(0);
-  vhactive = SPI_PORT.transfer(0);
-  vlactive = SPI_PORT.transfer(0);
-  temperatureL = SPI_PORT.transfer(0);
-  temperatureH = SPI_PORT.transfer(0);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
 }
 
 char* SIGFOXClass::readConfig(int* len)
 {
 
-  digitalWrite(SS, LOW);
-  delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x1F);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x1F);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
 
   delay(5);
 
-  digitalWrite(SS, LOW);
-  delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x20);
-  SPI_PORT.transfer(0);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x20);
+  spi_port.transfer(0);
   tx_freq = SPI.transfer(0) | tx_freq << 8;
   tx_freq = SPI.transfer(0) | tx_freq << 8;
   tx_freq = SPI.transfer(0) | tx_freq << 8;
@@ -277,11 +297,11 @@ char* SIGFOXClass::readConfig(int* len)
   rx_freq = SPI.transfer(0) | rx_freq << 8;
   rx_freq = SPI.transfer(0) | rx_freq << 8;
   rx_freq = SPI.transfer(0) | rx_freq << 8;
-  repeat = SPI_PORT.transfer(0);
-  configuration = SPI_PORT.transfer(0);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
+  repeat = spi_port.transfer(0);
+  configuration = spi_port.transfer(0);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
+
   buffer[0] = tx_freq;
   buffer[4] = rx_freq;
   buffer[8] = repeat;
@@ -292,16 +312,15 @@ char* SIGFOXClass::readConfig(int* len)
 }
 unsigned char* SIGFOXClass::getAtmVersion()
 {
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x06);
+  spi_port.transfer(0);
+  byte mv = spi_port.transfer(0);
+  byte lv = spi_port.transfer(0);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
   delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x06);
-  SPI_PORT.transfer(0);
-  byte mv = SPI_PORT.transfer(0);
-  byte lv = SPI_PORT.transfer(0);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
   buffer[0] = mv;
   buffer[1] = lv;
   buffer[2] = '\0';
@@ -310,16 +329,15 @@ unsigned char* SIGFOXClass::getAtmVersion()
 
 unsigned char* SIGFOXClass::getSigVersion()
 {
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x06);
+  spi_port.transfer(0);
+  byte mv = spi_port.transfer(0);
+  byte lv = spi_port.transfer(0);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
   delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x06);
-  SPI_PORT.transfer(0);
-  byte mv = SPI_PORT.transfer(0);
-  byte lv = SPI_PORT.transfer(0);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
   buffer[0] = mv;
   buffer[1] = lv;
   buffer[2] = '\0';
@@ -328,18 +346,17 @@ unsigned char* SIGFOXClass::getSigVersion()
 
 unsigned char* SIGFOXClass::getID()
 {
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x12);
+  spi_port.transfer(0);
+  byte ID3 = spi_port.transfer(0);
+  byte ID2 = spi_port.transfer(0);
+  byte ID1 = spi_port.transfer(0);
+  byte ID0 = spi_port.transfer(0);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
   delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x12);
-  SPI_PORT.transfer(0);
-  byte ID3 = SPI_PORT.transfer(0);
-  byte ID2 = SPI_PORT.transfer(0);
-  byte ID1 = SPI_PORT.transfer(0);
-  byte ID0 = SPI_PORT.transfer(0);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
   buffer[0] = ID3; buffer[1] = ID2; buffer[2] = ID1; buffer[3] = ID0;
   buffer[4] = '\0';
   return buffer;
@@ -348,98 +365,89 @@ unsigned char* SIGFOXClass::getID()
 unsigned char* SIGFOXClass::getPAC()
 {
   int i;
-  digitalWrite(SS, LOW);
-  delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x0F);
-  SPI_PORT.transfer(0);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x0F);
+  spi_port.transfer(0);
   for (i = 0; i < 16; i++) {
-    buffer[i] = SPI_PORT.transfer(0);
+    buffer[i] = spi_port.transfer(0);
   }
-  SPI_PORT.endTransaction();
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
   delay(1);
-  digitalWrite(SS, HIGH);
   buffer[16] = '\0';
   return buffer;
 }
 
 void SIGFOXClass::reset()
 {
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x01);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
   delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x01);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
 }
 
 void SIGFOXClass::testMode(byte frameL, byte frameH, byte chanL, byte chanH)
 {
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x08);
+  spi_port.transfer(frameL);
+  spi_port.transfer(frameH);
+  spi_port.transfer(chanL);
+  spi_port.transfer(chanH);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
   delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x08);
-  SPI_PORT.transfer(frameL);
-  SPI_PORT.transfer(frameH);
-  SPI_PORT.transfer(chanL);
-  SPI_PORT.transfer(chanH);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
 }
 
-void SIGFOXClass::setEUMode()
+void SIGFOXClass::setMode(Country EUMode, TxRxMode tx_rx)
 {
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x11);
+  spi_port.transfer(0);
+  spi_port.transfer(1);
+  spi_port.transfer(0x2);
+  uint8_t mode = (0x3 << 4) | (1 << 3) | (EUMode << 2) | (tx_rx << 1) | 1;
+  spi_port.transfer(mode);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
   delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x11);
-  SPI_PORT.transfer(0);
-  SPI_PORT.transfer(1);
-  SPI_PORT.transfer(0x2);
-  SPI_PORT.transfer(0xFB);
-  //SPI_PORT.transfer(0x3F);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
+
   int ret = 99;
   for (int i = 0; i < 300; i++)
   {
-    if (digitalRead(NEVENT) == 0) {
+    if (digitalRead(interrupt_pin) == 0) {
       getStatus();
       ret = getStatusCode(2);
       break;
     }
-    else {
-      analogWrite(LED1, 200);
-      delay(50);
-      analogWrite(LED1, 0);
-      delay(50);
-    }
+    delay(10);
   }
   if (ret == 99) {
     Serial.println("Failed to set mode");
   }
-  digitalWrite(SS, LOW);
-  delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x05);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
+
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x05);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
   delay(100);
 }
+
 void SIGFOXClass::end()
 {
-  digitalWrite(SS, LOW);
+  digitalWrite(chip_select_pin, LOW);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x05);
+  spi_port.endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
+  pinMode(poweron_pin, HIGH);
   delay(1);
-  SPI_PORT.beginTransaction(SPICONFIG);
-  SPI_PORT.transfer(0x05);
-  SPI_PORT.endTransaction();
-  delay(1);
-  digitalWrite(SS, HIGH);
-  pinMode(RFPWR, HIGH);
 }
 
 SIGFOXClass SigFox; //singleton
