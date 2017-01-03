@@ -24,6 +24,11 @@ void setup() {
   // Comment this line when shipping your project :)
   SigFox.debug(true);
 
+  // Set region and transmission mode
+  // if TX - only mode is selected, function receive() will not be available
+  // Possible regions are US and EU
+  SigFox.setMode(EU, TXRX);
+
   String version = SigFox.getSigVersion();
   String ID = SigFox.getID();
   String PAC = SigFox.getPAC();
@@ -36,16 +41,16 @@ void setup() {
 
   Serial.println("");
 
+  Serial.print("Module temperature: ");
+  Serial.println(SigFox.getTemperatureInternal());
+
 #if ARDUINO >= 10801
   Serial.println("Click <a href=\"https://backend.sigfox.com/new?pac=" + PAC + "?id=" + ID +  "\">here</a> to register the board on SigFox network");
 #else
   Serial.println("Register your board on https://backend.sigfox.com with provided ID and PAC");
 #endif
 
-  // Set region and transmission mode
-  // if TX - only mode is selected, function receive() will not be available
-  // Possible regions are US and EU
-  SigFox.setMode(EU, TXRX);
+  delay(100);
 
   // Send the module to the deepest sleep
   SigFox.end();
@@ -90,10 +95,11 @@ void sendString(String str) {
   delay(1);
 
   int ret = SigFox.send(str);  // send buffer to SIGFOX network
-  if (ret > 0)
+  if (ret > 0) {
     Serial.println("No transmission");
-  else
+  } else {
     Serial.println("Transmission ok");
+  }
 
   Serial.println(SigFox.getStatus(SIGFOX));
   Serial.println(SigFox.getStatus(ATMEL));
@@ -110,10 +116,11 @@ void sendStringAndGetResponse(String str) {
   delay(1);
 
   int ret = SigFox.receive(str);  // send buffer to SIGFOX network
-  if (ret > 0)
+  if (ret > 0) {
     Serial.println("No transmission");
-  else
+  } else {
     Serial.println("Transmission ok");
+  }
 
   Serial.println(SigFox.getStatus(SIGFOX));
   Serial.println(SigFox.getStatus(ATMEL));
