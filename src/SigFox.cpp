@@ -95,7 +95,7 @@ int SIGFOXClass::begin(bool  __attribute__((unused)) configured)
   spi_port.setDataMode(SPI_MODE0);
   spi_port.setBitOrder(MSBFIRST);
 
-  delay(30);
+  delay(100);
 
   String version = getSigVersion();
   if (version == "0.0")
@@ -254,7 +254,7 @@ int SIGFOXClass::receive(unsigned char mess[], int len)
       getStatus();
       ret = getStatusCode(SIGFOX);
     }
-    goto exit;
+    goto exit_rec;
   }
 
   for (i = 0; i < 6000; i++)
@@ -271,7 +271,8 @@ int SIGFOXClass::receive(unsigned char mess[], int len)
       delay(50);
     }
   }
-exit:
+
+exit_rec:
   if (ret == 99) {
     sig = 13;
   }
@@ -608,12 +609,15 @@ void SIGFOXClass::setMode(Country EUMode, TxRxMode tx_rx)
 
 void SIGFOXClass::end()
 {
+  pinMode(poweron_pin, LOW);
+  delay(1);
   digitalWrite(chip_select_pin, LOW);
+  delay(1);
   spi_port.beginTransaction(SPICONFIG);
   spi_port.transfer(0x05);
   spi_port.endTransaction();
+  delay(1);
   digitalWrite(chip_select_pin, HIGH);
-  pinMode(poweron_pin, HIGH);
   delay(1);
 }
 
