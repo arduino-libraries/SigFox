@@ -402,6 +402,27 @@ void SIGFOXClass::getStatus()
 float SIGFOXClass::getTemperatureInternal()
 {
   digitalWrite(chip_select_pin, LOW);
+  delay(1);
+  spi_port.beginTransaction(SPICONFIG);
+  spi_port.transfer(0x14);
+  spi_port.endTransaction();
+  delay(1);
+  digitalWrite(chip_select_pin, HIGH);
+  delay(1);
+
+  for (int i = 0; i < 10; i++)
+  {
+    if (digitalRead(interrupt_pin) == 0) {
+      getStatus();
+      break;
+    }
+    else {
+      delay(10);
+    }
+  }
+
+  digitalWrite(chip_select_pin, LOW);
+  delay(1);
   spi_port.beginTransaction(SPICONFIG);
   spi_port.transfer(0x13);
   spi_port.transfer(0);
@@ -411,9 +432,11 @@ float SIGFOXClass::getTemperatureInternal()
   vhactive = spi_port.transfer(0);
   temperatureL = spi_port.transfer(0);
   temperatureH = spi_port.transfer(0);
+  delay(1);
   spi_port.endTransaction();
   digitalWrite(chip_select_pin, HIGH);
   delay(1);
+
   return float(temperatureH << 8 | temperatureL) / 10;
 }
 
@@ -421,6 +444,7 @@ char* SIGFOXClass::readConfig(int* len)
 {
 
   digitalWrite(chip_select_pin, LOW);
+  delay(1);
   spi_port.beginTransaction(SPICONFIG);
   spi_port.transfer(0x1F);
   spi_port.endTransaction();
@@ -443,7 +467,9 @@ char* SIGFOXClass::readConfig(int* len)
   repeat = spi_port.transfer(0);
   configuration = spi_port.transfer(0);
   spi_port.endTransaction();
+  delay(1);
   digitalWrite(chip_select_pin, HIGH);
+  delay(1);
 
   buffer[0] = tx_freq;
   buffer[4] = rx_freq;
