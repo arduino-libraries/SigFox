@@ -50,8 +50,21 @@ void setup() {
   // Send the module to the deepest sleep
   SigFox.end();
 
+  Serial.println("Type the message to be sent");
+  while (!Serial.available());
+
+  String message;
+  while (Serial.available()) {
+    message += (char)Serial.read();
+  }
+
+  Serial.println("Sending " + message);
+
+  // Remove EOL
+  message.trim();
+
   // Example of message that can be sent
-  sendString("Hello world!");
+  sendString(message);
 
   // Example of send and read response
   //sendStringAndGetResponse("Hello world!");
