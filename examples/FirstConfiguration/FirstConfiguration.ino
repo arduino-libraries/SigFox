@@ -51,10 +51,10 @@ void setup() {
   SigFox.end();
 
   // Example of message that can be sent
-  //sendString("Hello world!");
+  sendString("Hello world!");
 
   // Example of send and read response
-  sendStringAndGetResponse("Hello world!");
+  //sendStringAndGetResponse("Hello world!");
 }
 
 void loop()
