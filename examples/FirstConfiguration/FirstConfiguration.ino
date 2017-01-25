@@ -63,6 +63,13 @@ void setup() {
     message += (char)Serial.read();
   }
 
+  // Every SigFox packet cannot exceed 12 bytes
+  // If the string is longer, only the first 12 bytes will be sent
+
+  if (message.length() > 12) {
+    Serial.println("Message too long, only first 12 bytes will be sent");
+  }
+
   Serial.println("Sending " + message);
 
   // Remove EOL
