@@ -1,7 +1,7 @@
 /*
   SigFox Simple Weather Station
 
-  This sketch demonstrates the usage of MKR3000 as a simple weather station.
+  This sketch demonstrates the usage of MKRFox1200 as a simple weather station.
   It uses
     the onboard temperature sensor
     HTU21D I2C sensor to get humidity

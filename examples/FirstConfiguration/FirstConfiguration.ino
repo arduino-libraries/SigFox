@@ -1,7 +1,7 @@
 /*
   SigFox Getting started
 
-  This sketch demonstrates the usage of MKR3000 SigFox module.
+  This sketch demonstrates the usage of MKRFox1200 SigFox module.
   Since the board is designed with lowe power in mind, it depends directly on ArduinoLowPower library
 
   This example code is in the public domain.
@@ -34,7 +34,7 @@ void setup() {
   String PAC = SigFox.getPAC();
 
   // Display module informations
-  Serial.println("MKR3000 Sigfox first configuration");
+  Serial.println("MKRFox1200 Sigfox first configuration");
   Serial.println("SigFox FW version " + version);
   Serial.println("ID  = " + ID);
   Serial.println("PAC = " + PAC);
