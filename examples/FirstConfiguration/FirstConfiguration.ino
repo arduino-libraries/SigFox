@@ -88,7 +88,7 @@ void sendString(String str) {
   // Wait at least 30mS after first configuration (100mS before)
   delay(100);
   // Clears all pending interrupts
-  SigFox.getStatus();
+  SigFox.status();
   delay(1);
 
   int ret = SigFox.send(str);  // send buffer to SIGFOX network
@@ -98,8 +98,8 @@ void sendString(String str) {
     Serial.println("Transmission ok");
   }
 
-  Serial.println(SigFox.getStatus(SIGFOX));
-  Serial.println(SigFox.getStatus(ATMEL));
+  Serial.println(SigFox.status(SIGFOX));
+  Serial.println(SigFox.status(ATMEL));
   SigFox.end();
 }
 
@@ -109,7 +109,7 @@ void sendStringAndGetResponse(String str) {
   // Wait at least 30mS after first configuration (100mS before)
   delay(100);
   // Clears all pending interrupts
-  SigFox.getStatus();
+  SigFox.status();
   delay(1);
 
   int ret = SigFox.receive(str);  // send buffer to SIGFOX network
@@ -119,8 +119,8 @@ void sendStringAndGetResponse(String str) {
     Serial.println("Transmission ok");
   }
 
-  Serial.println(SigFox.getStatus(SIGFOX));
-  Serial.println(SigFox.getStatus(ATMEL));
+  Serial.println(SigFox.status(SIGFOX));
+  Serial.println(SigFox.status(ATMEL));
 
   Serial.println("Response from server:");
   while (SigFox.available()) {
