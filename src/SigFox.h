@@ -58,11 +58,15 @@ class SIGFOXClass
   /*
   * Enables debug LED and prints
   */
-  void debug(bool on);
+  void debug();
+  /*
+  * Disables debug LED and prints
+  */
+  void noDebug();
   /*
   * Initialize module (ready to transmit)
   */
-  int begin(bool configured = false);
+  int begin();
     /*
   * Initialize module specifying SPI port and pins (ready to transmit)
   */
@@ -113,39 +117,39 @@ class SIGFOXClass
   /*
   * Read status (fill ssm,atm,sig status variables)
   */
-  void getStatus();
+  void status();
   /*
   * Return status code.
   * Type: 0 -> ssm status ; 1 -> atm status ; 2 -> sigfox status    
   */
-  int getStatusCode(Protocol type);
+  int statusCode(Protocol type);
   /*
   * Return status code.
   * Type: 0 -> ssm status ; 1 -> atm status ; 2 -> sigfox status
   */
-  char* getStatus(Protocol type);
+  char* status(Protocol type);
   /*
   * Return ATM version (major ver,minor ver)(two bytes)
   */
-  String getAtmVersion();
+  String AtmVersion();
   /*
   * Return SIGFOX version (major ver, minor ver) (two bytes)
   */
-  String getSigVersion();
+  String SigVersion();
   /*
   * Return ID (4 bytes)
   */
-  String getID();
+  String ID();
   /*
   * Return PAC (16 bytes)
   */
-  String getPAC();
+  String PAC();
   /*
   * Reset module
   */
   void reset();
 
-  float getTemperatureInternal();
+  float temperatureInternal();
 
   void setMode(Country EUMode, TxRxMode tx_rx);
 
@@ -185,6 +189,7 @@ class SIGFOXClass
   uint32_t tx_freq, rx_freq;
   uint8_t configuration;
   uint8_t repeat;
+  bool _configured = false;
   char buffer[BLEN];
   char rx_buffer[MAX_RX_BUF_LEN];
   SPIClass& spi_port = SPI;

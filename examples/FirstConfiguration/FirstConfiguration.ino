@@ -11,7 +11,7 @@
 #include "ArduinoLowPower.h"
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   while (!Serial) {};
 
   // Uncomment this line and comment begin() if you are working with a custom board
@@ -22,16 +22,16 @@ void setup() {
   }
   // Enable debug led and disable automatic deep sleep
   // Comment this line when shipping your project :)
-  SigFox.debug(true);
+  SigFox.debug();
 
   // Set region and transmission mode
   // if TX - only mode is selected, function receive() will not be available
   // Possible regions are US and EU
   SigFox.setMode(EU, TXRX);
 
-  String version = SigFox.getSigVersion();
-  String ID = SigFox.getID();
-  String PAC = SigFox.getPAC();
+  String version = SigFox.SigVersion();
+  String ID = SigFox.ID();
+  String PAC = SigFox.PAC();
 
   // Display module informations
   Serial.println("MKRFox1200 Sigfox first configuration");
@@ -42,13 +42,9 @@ void setup() {
   Serial.println("");
 
   Serial.print("Module temperature: ");
-  Serial.println(SigFox.getTemperatureInternal());
+  Serial.println(SigFox.temperatureInternal());
 
-#if ARDUINO >= 10801
-  Serial.println("Click <a href=\"https://backend.sigfox.com/new?pac=" + PAC + "?id=" + ID +  "\">here</a> to register the board on SigFox network");
-#else
-  Serial.println("Register your board on https://backend.sigfox.com with provided ID and PAC");
-#endif
+  Serial.println("Register your board on https://backend.sigfox.com/activate with provided ID and PAC");
 
   delay(100);
 
@@ -84,12 +80,6 @@ void setup() {
 
 void loop()
 {
-  // Uncomment to sleep for 10minutes
-  // LowPower.sleep(10 * 60 * 1000);
-  // Check if something happened and eventually report back
-  // result = do_the_check();
-  // if (result == true)
-  //  sendString("something")
 }
 
 void sendString(String str) {

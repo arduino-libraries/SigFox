@@ -54,16 +54,18 @@ const char * sigstr[14]  =        // SIGFOX message status
 
 #define SPICONFIG   SPISettings(100000UL, MSBFIRST, SPI_MODE0)
 
-void SIGFOXClass::debug(bool on) {
+void SIGFOXClass::debug() {
   // Enables debug via LED and Serial prints
   // Also disables greedy sleep strategy
-  debugging = on;
-  if (debugging) {
-    pinMode(led_pin, OUTPUT);
-  }
+  debugging = true;
+  pinMode(led_pin, OUTPUT);
 }
 
-int SIGFOXClass::begin(bool  __attribute__((unused)) configured)
+void SIGFOXClass::noDebug() {
+  debugging = false;
+}
+
+int SIGFOXClass::begin()
 {
 #ifdef SIGFOX_SPI
   spi_port = SIGFOX_SPI;
@@ -74,7 +76,7 @@ int SIGFOXClass::begin(bool  __attribute__((unused)) configured)
   led_pin = LED_BUILTIN;
 #else
   // begin() can only be used on boards with embedded Sigfox module
-  if (configured == false) {
+  if (_configured == false) {
     return false;
   }
 #endif
@@ -97,7 +99,7 @@ int SIGFOXClass::begin(bool  __attribute__((unused)) configured)
 
   delay(100);
 
-  String version = getSigVersion();
+  String version = SigVersion();
   if (version == "0.0")
     return false;
   return true;
@@ -111,8 +113,8 @@ int SIGFOXClass::begin(SPIClass& spi, int reset, int poweron, int interrupt, int
   interrupt_pin = interrupt;
   chip_select_pin = chip_select;
   led_pin = led;
-
-  return begin(true);
+  _configured = true;
+  return begin();
 }
 
 int SIGFOXClass::send(String mess)
@@ -142,7 +144,7 @@ int SIGFOXClass::receive(char mess[])
 int SIGFOXClass::send(unsigned char mess[], int len)
 {
   if (len == 0) return -1;
-  getStatus();
+  status();
 
   digitalWrite(chip_select_pin, LOW);
   delay(1);
@@ -174,8 +176,8 @@ int SIGFOXClass::send(unsigned char mess[], int len)
     LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
     LowPower.sleep(10000);
     if (digitalRead(interrupt_pin) == 0) {
-      getStatus();
-      ret = getStatusCode(SIGFOX);
+      status();
+      ret = statusCode(SIGFOX);
     }
     goto exit;
   }
@@ -183,8 +185,8 @@ int SIGFOXClass::send(unsigned char mess[], int len)
   for (i = 0; i < 6000; i++)
   {
     if (digitalRead(interrupt_pin) == 0) {
-      getStatus();
-      ret = getStatusCode(SIGFOX);
+      status();
+      ret = statusCode(SIGFOX);
       break;
     }
     else {
@@ -219,7 +221,7 @@ int SIGFOXClass::peek() {
 int SIGFOXClass::receive(unsigned char mess[], int len)
 {
   if (len == 0) return -1;
-  getStatus();
+  status();
 
   digitalWrite(chip_select_pin, LOW);
   delay(1);
@@ -251,8 +253,8 @@ int SIGFOXClass::receive(unsigned char mess[], int len)
     LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
     LowPower.sleep(100000);
     if (digitalRead(interrupt_pin) == 0) {
-      getStatus();
-      ret = getStatusCode(SIGFOX);
+      status();
+      ret = statusCode(SIGFOX);
     }
     goto exit_rec;
   }
@@ -260,8 +262,8 @@ int SIGFOXClass::receive(unsigned char mess[], int len)
   for (i = 0; i < 6000; i++)
   {
     if (digitalRead(interrupt_pin) == 0) {
-      getStatus();
-      ret = getStatusCode(SIGFOX);
+      status();
+      ret = statusCode(SIGFOX);
       break;
     }
     else {
@@ -304,8 +306,8 @@ int SIGFOXClass::calibrateCrystal() {
   for (int i = 0; i < 6000; i++)
   {
     if (digitalRead(interrupt_pin) == 0) {
-      getStatus();
-      ret = getStatusCode(SIGFOX);
+      status();
+      ret = statusCode(SIGFOX);
       break;
     }
     else {
@@ -319,7 +321,7 @@ int SIGFOXClass::calibrateCrystal() {
   return sig;
 }
 
-int SIGFOXClass::getStatusCode(Protocol type)
+int SIGFOXClass::statusCode(Protocol type)
 {
   switch (type)
   {
@@ -330,9 +332,9 @@ int SIGFOXClass::getStatusCode(Protocol type)
   return -1;
 }
 
-char* SIGFOXClass::getStatus(Protocol type)
+char* SIGFOXClass::status(Protocol type)
 {
-  getStatus();
+  status();
   switch (type)
   {
     case SSM :
@@ -385,7 +387,7 @@ char* SIGFOXClass::getStatusSig()
   return (char*)buffer;
 }
 
-void SIGFOXClass::getStatus()
+void SIGFOXClass::status()
 {
   digitalWrite(chip_select_pin, LOW);
   spi_port.beginTransaction(SPICONFIG);
@@ -400,7 +402,7 @@ void SIGFOXClass::getStatus()
   delay(1);
 }
 
-float SIGFOXClass::getTemperatureInternal()
+float SIGFOXClass::temperatureInternal()
 {
   digitalWrite(chip_select_pin, LOW);
   delay(1);
@@ -414,7 +416,7 @@ float SIGFOXClass::getTemperatureInternal()
   for (int i = 0; i < 10; i++)
   {
     if (digitalRead(interrupt_pin) == 0) {
-      getStatus();
+      status();
       break;
     }
     else {
@@ -481,7 +483,7 @@ char* SIGFOXClass::readConfig(int* len)
   return (char*)buffer;
 }
 
-String SIGFOXClass::getAtmVersion()
+String SIGFOXClass::AtmVersion()
 {
   digitalWrite(chip_select_pin, LOW);
   spi_port.beginTransaction(SPICONFIG);
@@ -496,7 +498,7 @@ String SIGFOXClass::getAtmVersion()
   return String(buffer);
 }
 
-String SIGFOXClass::getSigVersion()
+String SIGFOXClass::SigVersion()
 {
   digitalWrite(chip_select_pin, LOW);
   spi_port.beginTransaction(SPICONFIG);
@@ -511,7 +513,7 @@ String SIGFOXClass::getSigVersion()
   return String(buffer);
 }
 
-String SIGFOXClass::getID()
+String SIGFOXClass::ID()
 {
   digitalWrite(chip_select_pin, LOW);
   spi_port.beginTransaction(SPICONFIG);
@@ -528,7 +530,7 @@ String SIGFOXClass::getID()
   return String(buffer);
 }
 
-String SIGFOXClass::getPAC()
+String SIGFOXClass::PAC()
 {
   uint8_t pac[16];
   digitalWrite(chip_select_pin, LOW);
@@ -589,8 +591,8 @@ void SIGFOXClass::setMode(Country EUMode, TxRxMode tx_rx)
   for (int i = 0; i < 300; i++)
   {
     if (digitalRead(interrupt_pin) == 0) {
-      getStatus();
-      ret = getStatusCode(SIGFOX);
+      status();
+      ret = statusCode(SIGFOX);
       break;
     }
     delay(10);
