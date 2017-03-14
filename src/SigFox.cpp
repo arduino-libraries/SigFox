@@ -201,6 +201,36 @@ exit:
   return sig;
 }
 
+int SIGFOXClass::beginPacket() {
+  bool ret = (tx_buffer_index == -1);
+  tx_buffer_index = 0;
+  return (ret ? 1 : 0);
+}
+
+int SIGFOXClass::endPacket() {
+  int ret = send(tx_buffer, tx_buffer_index);
+  // invalidate the buffer
+  tx_buffer_index = -1;
+  return ret;
+}
+
+size_t SIGFOXClass::write(uint8_t val) {
+  if (tx_buffer_index > 0 && tx_buffer_index < MAX_TX_BUF_LEN) {
+      tx_buffer[tx_buffer_index++] = val;
+      return 1;
+  }
+  return 0;
+};
+
+size_t SIGFOXClass::write(const uint8_t *buffer, size_t size) {
+  if (tx_buffer_index > 0 && tx_buffer_index + size < MAX_TX_BUF_LEN) {
+    memcpy(&tx_buffer[tx_buffer_index], buffer, size);
+    tx_buffer_index += size;
+    return size;
+  }
+  return 0;
+}
+
 int SIGFOXClass::available() {
   return rx_buf_len;
 }

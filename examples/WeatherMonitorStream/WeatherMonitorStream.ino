@@ -17,6 +17,9 @@
   Since the Sigfox network can send a maximum of 120 messages per day (depending on your plan)
   we'll optimize the readings and send data in compact binary format
 
+  This sketch shows how to use the Stream APIs of the library.
+  Refer to WeatherMonitor sketch for an example using data structures.
+
   This example code is in the public domain.
 */
 
@@ -40,24 +43,7 @@ Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 1234
 #define STATUS_HTU_KO 2
 #define STATUS_TSL_KO 4
 
-/*
-    ATTENTION - the structure we are going to send MUST
-    be declared "packed" otherwise we'll get padding mismatch
-    on the sent data - see http://www.catb.org/esr/structure-packing/#_structure_alignment_and_padding
-    for more details
-*/
-typedef struct __attribute__ ((packed)) sigfox_message {
-  uint8_t status;
-  int16_t moduleTemperature;
-  int16_t bmpTemperature;
-  uint16_t bmpPressure;
-  uint16_t htuHumidity;
-  uint16_t tlsLight;
-  uint8_t lastMessageStatus;
-} SigfoxMessage;
-
-// stub for message which will be sent
-SigfoxMessage msg;
+byte status;
 
 void setup() {
 
@@ -82,19 +68,19 @@ void setup() {
 
   // Configure the sensors and populate the status field
   if (!bmp.begin()) {
-    msg.status |= STATUS_BMP_KO;
+    status |= STATUS_BMP_KO;
   } else {
     Serial.println("BMP OK");
   }
 
   if (!htu.begin()) {
-    msg.status |= STATUS_HTU_KO;
+    status |= STATUS_HTU_KO;
   } else {
     Serial.println("HTU OK");
   }
 
   if (!tsl.begin()) {
-    msg.status |= STATUS_TSL_KO;
+    status |= STATUS_TSL_KO;
   } else {
     Serial.println("TLS OK");
     tsl.enableAutoRange(true);
@@ -110,45 +96,36 @@ void loop() {
   sensors_event_t event;
 
   float pressure = bmp.readPressure();
-  msg.bmpPressure = convertoFloatToUInt16(pressure, 200000);
   float temperature = bmp.readTemperature();
-  msg.bmpTemperature = convertoFloatToInt16(temperature, 60, -60);
+  float humidity = htu.readHumidity();
 
   tsl.getEvent(&event);
-  if (event.light) {
-    msg.tlsLight = convertoFloatToUInt16(event.light, 100000);
-  }
-
-  float humidity = htu.readHumidity();
-  msg.htuHumidity = convertoFloatToUInt16(humidity, 110);
+  float light = event.light;
 
   // Start the module
   SigFox.begin();
   // Wait at least 30ms after first configuration (100ms before)
   delay(100);
 
-  // We can only read the module temperature before SigFox.end()
-  temperature = SigFox.temperatureInternal();
-  msg.moduleTemperature = convertoFloatToInt16(temperature, 60, -60);
+  // Prepare the packet using the Stream APIs
+  SigFox.beginPacket();
+  SigFox.write((byte)status);
+  SigFox.write((short)convertoFloatToInt16(temperature, 60, -60));
+  SigFox.write((unsigned short)convertoFloatToUInt16(pressure, 200000));
+  SigFox.write((unsigned short)convertoFloatToUInt16(humidity, 110));
+  SigFox.write((unsigned short)convertoFloatToUInt16(light, 100000));
+
+  int ret = SigFox.endPacket();
 
   if (ONESHOT == true) {
     Serial.println("Pressure: " + String(pressure));
     Serial.println("External temperature: " + String(temperature));
-    Serial.println("Internal temp: " + String(temperature));
     Serial.println("Light: " + String(event.light));
     Serial.println("Humidity: " + String(humidity));
+    Serial.println("Status: " + String(ret));
   }
 
-  // Clears all pending interrupts
-  SigFox.status();
-  delay(1);
-
-  msg.lastMessageStatus = (uint8_t) SigFox.send((uint8_t*)&msg, 12);
-
-  if (ONESHOT == true) {
-    Serial.println("Status: " + String(msg.lastMessageStatus));
-  }
-
+  // Shut down the module
   SigFox.end();
 
   if (ONESHOT == true) {

@@ -34,6 +34,7 @@
 
 #define BLEN  64            // Communication buffer length
 #define MAX_RX_BUF_LEN  8
+#define MAX_TX_BUF_LEN  13
 
 typedef enum country {
   US = 0 ,
@@ -51,7 +52,7 @@ typedef enum protocol {
   SIGFOX
 } Protocol;
 
-class SIGFOXClass
+class SIGFOXClass : public Stream
 {
   public:
 
@@ -88,6 +89,16 @@ class SIGFOXClass
   * Return SIGFOX status code
   */
   int send(unsigned char mess[], int len);
+
+  // Stream compatibility (like UDP)
+  int beginPacket();
+  int endPacket();
+  size_t write(uint8_t);
+  size_t write(const uint8_t *buffer, size_t size);
+
+  //makes no sense in Sigfox world
+  void flush() {};
+
   /*
   * Send String as message to SIGFOX network
   * and receives a message back
@@ -191,7 +202,9 @@ class SIGFOXClass
   uint8_t repeat;
   bool _configured = false;
   char buffer[BLEN];
-  char rx_buffer[MAX_RX_BUF_LEN];
+  unsigned char rx_buffer[MAX_RX_BUF_LEN];
+  unsigned char tx_buffer[MAX_TX_BUF_LEN];
+  int tx_buffer_index = -1;
   SPIClass& spi_port = SPI;
   int reset_pin;
   int poweron_pin;
