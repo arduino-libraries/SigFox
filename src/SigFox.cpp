@@ -589,15 +589,16 @@ void SIGFOXClass::reset()
   delay(1);
 }
 
-void SIGFOXClass::testMode(byte frameL, byte frameH, byte chanL, byte chanH)
+void SIGFOXClass::testMode(bool on)
 {
   digitalWrite(chip_select_pin, LOW);
   spi_port.beginTransaction(SPICONFIG);
-  spi_port.transfer(0x08);
-  spi_port.transfer(frameL);
-  spi_port.transfer(frameH);
-  spi_port.transfer(chanL);
-  spi_port.transfer(chanH);
+  spi_port.transfer(0x17);
+  if (on) {
+    spi_port.transfer(0x11);
+  } else {
+    spi_port.transfer(0x00);
+  }
   spi_port.endTransaction();
   digitalWrite(chip_select_pin, HIGH);
   delay(1);

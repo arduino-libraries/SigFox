@@ -168,7 +168,7 @@ class SIGFOXClass : public Stream
   /*
   * Test mode
   */
-  void testMode(byte frameL,byte frameH, byte chanL,byte chanH);
+  void testMode (bool);
   /*
   *  Disable module
   */
