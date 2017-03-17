@@ -23,12 +23,12 @@
   This example code is in the public domain.
 */
 
-#include "ArduinoLowPower.h"
-#include "SigFox.h"
-#include "Adafruit_HTU21DF.h"
-#include "Adafruit_Sensor.h"
-#include "Adafruit_BMP280.h"
-#include "Adafruit_TSL2561_U.h"
+#include <ArduinoLowPower.h>
+#include <SigFox.h>
+#include <Adafruit_HTU21DF.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BMP280.h>
+#include <Adafruit_TSL2561_U.h>
 #include "conversions.h"
 
 // Set ONESHOT to false to trigger continuous mode when you finisched setting up the whole flow

@@ -125,6 +125,9 @@ class SIGFOXClass : public Stream
   int peek();
   int available();
   int read();
+
+  int parsePacket();
+
   /*
   * Read status (fill ssm,atm,sig status variables)
   */
@@ -164,17 +167,10 @@ class SIGFOXClass : public Stream
 
   void setMode(Country EUMode, TxRxMode tx_rx);
 
-  int calibrateCrystal();
-  /*
-  * Test mode
-  */
-  void testMode (bool);
   /*
   *  Disable module
   */
   void end();
-
-  char* readConfig(int* len);
 
   private:
 
@@ -186,6 +182,15 @@ class SIGFOXClass : public Stream
   * Return SIGFOX status message
   */
   char* getStatusSig();
+
+  int calibrateCrystal();
+
+  /*
+  * Test mode
+  */
+  void testMode (bool);
+
+  char* readConfig(int* len);
 
   byte ssm;
   byte atm;

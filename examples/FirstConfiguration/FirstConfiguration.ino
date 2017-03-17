@@ -1,14 +1,14 @@
 /*
-  SigFox Getting started
+  SigFox First Configuration
 
   This sketch demonstrates the usage of MKRFox1200 SigFox module.
-  Since the board is designed with lowe power in mind, it depends directly on ArduinoLowPower library
+  Since the board is designed with low power in mind, it depends directly on ArduinoLowPower library
 
   This example code is in the public domain.
 */
 
-#include "SigFox.h"
-#include "ArduinoLowPower.h"
+#include <SigFox.h>
+#include <ArduinoLowPower.h>
 
 void setup() {
   Serial.begin(9600);
@@ -72,10 +72,13 @@ void setup() {
   message.trim();
 
   // Example of message that can be sent
-  sendString(message);
+  // sendString(message);
+
+  Serial.println("Getting the response will take up to 50 seconds");
+  Serial.println("The LED will blink while the operation is ongoing");
 
   // Example of send and read response
-  //sendStringAndGetResponse("Hello world!");
+  sendStringAndGetResponse(message);
 }
 
 void loop()
@@ -122,10 +125,16 @@ void sendStringAndGetResponse(String str) {
   Serial.println(SigFox.status(SIGFOX));
   Serial.println(SigFox.status(ATMEL));
 
-  Serial.println("Response from server:");
-  while (SigFox.available()) {
-    Serial.print("0x");
-    Serial.println(SigFox.read(), HEX);
+  if (SigFox.parsePacket()) {
+    Serial.println("Response from server:");
+    while (SigFox.available()) {
+      Serial.print("0x");
+      Serial.println(SigFox.read(), HEX);
+    }
+  } else {
+    Serial.println("Could not get any response from the server");
+    Serial.println("Check the SigFox coverage in your area");
+    Serial.println("If you are indoor, check the 20dB coverage or move near a window");
   }
   Serial.println();
 

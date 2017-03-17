@@ -9,8 +9,8 @@
   This example code is in the public domain.
 */
 
-#include "SigFox.h"
-#include "ArduinoLowPower.h"
+#include <SigFox.h>
+#include <ArduinoLowPower.h>
 
 // Set DEBUG to false to enable continuous mode
 // and disable serial prints

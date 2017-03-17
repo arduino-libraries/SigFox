@@ -324,6 +324,13 @@ exit_rec:
   return sig;
 }
 
+int SIGFOXClass::parsePacket() {
+  if (rx_buf_len == MAX_RX_BUF_LEN) {
+    return MAX_RX_BUF_LEN;
+  }
+  return 0;
+}
+
 int SIGFOXClass::calibrateCrystal() {
   digitalWrite(chip_select_pin, LOW);
   spi_port.beginTransaction(SPICONFIG);
