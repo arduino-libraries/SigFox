@@ -96,6 +96,9 @@ class SIGFOXClass : public Stream
   size_t write(uint8_t);
   size_t write(const uint8_t *buffer, size_t size);
 
+  template <typename T> inline size_t write(T val) {return write((uint8_t*)&val, sizeof(T));};
+  using Print::write;
+
   //makes no sense in Sigfox world
   void flush() {};
 

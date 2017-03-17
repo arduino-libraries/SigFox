@@ -215,7 +215,7 @@ int SIGFOXClass::endPacket() {
 }
 
 size_t SIGFOXClass::write(uint8_t val) {
-  if (tx_buffer_index > 0 && tx_buffer_index < MAX_TX_BUF_LEN) {
+  if (tx_buffer_index >= 0 && tx_buffer_index < MAX_TX_BUF_LEN) {
       tx_buffer[tx_buffer_index++] = val;
       return 1;
   }
@@ -223,7 +223,7 @@ size_t SIGFOXClass::write(uint8_t val) {
 };
 
 size_t SIGFOXClass::write(const uint8_t *buffer, size_t size) {
-  if (tx_buffer_index > 0 && tx_buffer_index + size < MAX_TX_BUF_LEN) {
+  if (tx_buffer_index >= 0 && tx_buffer_index + size < MAX_TX_BUF_LEN) {
     memcpy(&tx_buffer[tx_buffer_index], buffer, size);
     tx_buffer_index += size;
     return size;
