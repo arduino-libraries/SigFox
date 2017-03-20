@@ -12,15 +12,15 @@
 #include <SigFox.h>
 #include <ArduinoLowPower.h>
 
-// Set DEBUG to false to enable continuous mode
+// Set debug to false to enable continuous mode
 // and disable serial prints
-int DEBUG = true;
+int debug = true;
 
 volatile int alarm_source = 0;
 
 void setup() {
 
-  if (DEBUG == true) {
+  if (debug == true) {
     Serial.begin(115200);
     while (!Serial) {}
   }
@@ -33,7 +33,7 @@ void setup() {
   //Send module to standby until we need to send a message
   SigFox.end();
 
-  if (DEBUG == true) {
+  if (debug == true) {
     // Enable debug prints and LED indication if we are testing
     SigFox.debug();
   }
@@ -55,7 +55,7 @@ void loop()
 
   SigFox.begin();
 
-  if (DEBUG == true) {
+  if (debug == true) {
     Serial.println("Alarm event on sensor " + String(alarm_source));
   }
   delay(100);
@@ -63,12 +63,14 @@ void loop()
   // 3 bytes (ALM) + 4 bytes (ID) + 1 byte (source) < 12 bytes
   String to_be_sent = "ALM" + SigFox.ID() +  String(alarm_source);
 
-  int ret = SigFox.send(to_be_sent);
+  SigFox.beginPacket();
+  SigFox.print(to_be_sent);
+  int ret = SigFox.endPacket();
 
   // shut down module, back to standby
   SigFox.end();
 
-  if (DEBUG == true) {
+  if (debug == true) {
     if (ret > 0) {
       Serial.println("No transmission");
     } else {

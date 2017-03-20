@@ -72,27 +72,10 @@ class SIGFOXClass : public Stream
   * Initialize module specifying SPI port and pins (ready to transmit)
   */
   int begin(SPIClass& spi, int reset, int poweron, int interrupt, int chip_select, int led);
-  /*
-  * Send String as message to SIGFOX network
-  * Max 12 characters long
-  * Return SIGFOX status code
-  */
-  int send(String mess);
-  /*
-  * Send null terminated string as message to SIGFOX network
-  * Max 12 characters long
-  * Return SIGFOX status code
-  */
-  int send(char mess[]);
-  /*
-  * Send an array of bytes (max 12 bytes long) as message to SIGFOX network
-  * Return SIGFOX status code
-  */
-  int send(unsigned char mess[], int len);
 
   // Stream compatibility (like UDP)
   int beginPacket();
-  int endPacket();
+  int endPacket(bool rx = false);
   size_t write(uint8_t);
   size_t write(const uint8_t *buffer, size_t size);
 
@@ -102,26 +85,6 @@ class SIGFOXClass : public Stream
   //makes no sense in Sigfox world
   void flush() {};
 
-  /*
-  * Send String as message to SIGFOX network
-  * and receives a message back
-  * Max 12 characters long
-  * Return SIGFOX status code
-  */
-  int receive(String mess);
-  /*
-  * Send null terminated string as message to SIGFOX network
-  * and receives a message back
-  * Max 12 characters long
-  * Return SIGFOX status code
-  */
-  int receive(char mess[]);
-  /*
-  * Send an array of bytes (max 12 bytes long) as message to SIGFOX network
-  * and receives a message back
-  * Return SIGFOX status code
-  */
-  int receive(unsigned char mess[], int len);
   /*
   * Commodity functions for Arduino-style message parse
   */
@@ -168,14 +131,18 @@ class SIGFOXClass : public Stream
 
   float temperatureInternal();
 
-  void setMode(Country EUMode, TxRxMode tx_rx);
-
   /*
   *  Disable module
   */
   void end();
 
   private:
+
+  /*
+  * Send an array of bytes (max 12 bytes long) as message to SIGFOX network
+  * Return SIGFOX status code
+  */
+  int send(unsigned char mess[], int len = 12, bool rx = false);
 
   /*
   * Return atm status message
@@ -194,6 +161,8 @@ class SIGFOXClass : public Stream
   void testMode (bool);
 
   char* readConfig(int* len);
+
+  void setMode(Country EUMode, TxRxMode tx_rx);
 
   byte ssm;
   byte atm;

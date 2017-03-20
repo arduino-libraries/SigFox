@@ -24,11 +24,6 @@ void setup() {
   // Comment this line when shipping your project :)
   SigFox.debug();
 
-  // Set region and transmission mode
-  // if TX - only mode is selected, function receive() will not be available
-  // Possible regions are US and EU
-  SigFox.setMode(EU, TXRX);
-
   String version = SigFox.SigVersion();
   String ID = SigFox.ID();
   String PAC = SigFox.PAC();
@@ -94,7 +89,10 @@ void sendString(String str) {
   SigFox.status();
   delay(1);
 
-  int ret = SigFox.send(str);  // send buffer to SIGFOX network
+  SigFox.beginPacket();
+  SigFox.print(str);
+
+  int ret = SigFox.endPacket();  // send buffer to SIGFOX network
   if (ret > 0) {
     Serial.println("No transmission");
   } else {
@@ -115,7 +113,10 @@ void sendStringAndGetResponse(String str) {
   SigFox.status();
   delay(1);
 
-  int ret = SigFox.receive(str);  // send buffer to SIGFOX network
+  SigFox.beginPacket();
+  SigFox.print(str);
+
+  int ret = SigFox.endPacket(true);  // send buffer to SIGFOX network and wait for a response
   if (ret > 0) {
     Serial.println("No transmission");
   } else {

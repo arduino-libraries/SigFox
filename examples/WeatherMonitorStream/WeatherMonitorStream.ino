@@ -31,8 +31,8 @@
 #include <Adafruit_TSL2561_U.h>
 #include "conversions.h"
 
-// Set ONESHOT to false to trigger continuous mode when you finisched setting up the whole flow
-int ONESHOT = true;
+// Set oneshot to false to trigger continuous mode when you finisched setting up the whole flow
+int oneshot = true;
 
 Adafruit_BMP280  bmp;
 Adafruit_HTU21DF htu = Adafruit_HTU21DF();
@@ -47,7 +47,7 @@ byte status;
 
 void setup() {
 
-  if (ONESHOT == true) {
+  if (oneshot == true) {
     // Wait for the serial
     Serial.begin(115200);
     while (!Serial) {}
@@ -61,7 +61,7 @@ void setup() {
   //Send module to standby until we need to send a message
   SigFox.end();
 
-  if (ONESHOT == true) {
+  if (oneshot == true) {
     // Enable debug prints and LED indication if we are testing
     SigFox.debug();
   }
@@ -117,7 +117,7 @@ void loop() {
 
   int ret = SigFox.endPacket();
 
-  if (ONESHOT == true) {
+  if (oneshot == true) {
     Serial.println("Pressure: " + String(pressure));
     Serial.println("External temperature: " + String(temperature));
     Serial.println("Light: " + String(event.light));
@@ -128,7 +128,7 @@ void loop() {
   // Shut down the module
   SigFox.end();
 
-  if (ONESHOT == true) {
+  if (oneshot == true) {
     // spin forever, so we can test that the backend is behaving correctly
     while (1) {}
   }

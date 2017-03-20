@@ -28,8 +28,8 @@
 #include <Adafruit_TSL2561_U.h>
 #include "conversions.h"
 
-// Set ONESHOT to false to trigger continuous mode when you finisched setting up the whole flow
-int ONESHOT = true;
+// Set oneshot to false to trigger continuous mode when you finisched setting up the whole flow
+int oneshot = true;
 
 Adafruit_BMP280  bmp;
 Adafruit_HTU21DF htu = Adafruit_HTU21DF();
@@ -61,7 +61,7 @@ SigfoxMessage msg;
 
 void setup() {
 
-  if (ONESHOT == true) {
+  if (oneshot == true) {
     // Wait for the serial
     Serial.begin(115200);
     while (!Serial) {}
@@ -75,7 +75,7 @@ void setup() {
   //Send module to standby until we need to send a message
   SigFox.end();
 
-  if (ONESHOT == true) {
+  if (oneshot == true) {
     // Enable debug prints and LED indication if we are testing
     SigFox.debug();
   }
@@ -131,7 +131,7 @@ void loop() {
   temperature = SigFox.temperatureInternal();
   msg.moduleTemperature = convertoFloatToInt16(temperature, 60, -60);
 
-  if (ONESHOT == true) {
+  if (oneshot == true) {
     Serial.println("Pressure: " + String(pressure));
     Serial.println("External temperature: " + String(temperature));
     Serial.println("Internal temp: " + String(temperature));
@@ -143,15 +143,18 @@ void loop() {
   SigFox.status();
   delay(1);
 
-  msg.lastMessageStatus = (uint8_t) SigFox.send((uint8_t*)&msg, 12);
+  SigFox.beginPacket();
+  SigFox.write((uint8_t*)&msg, 12);
 
-  if (ONESHOT == true) {
+  msg.lastMessageStatus = SigFox.endPacket();
+
+  if (oneshot == true) {
     Serial.println("Status: " + String(msg.lastMessageStatus));
   }
 
   SigFox.end();
 
-  if (ONESHOT == true) {
+  if (oneshot == true) {
     // spin forever, so we can test that the backend is behaving correctly
     while (1) {}
   }

@@ -117,31 +117,7 @@ int SIGFOXClass::begin(SPIClass& spi, int reset, int poweron, int interrupt, int
   return begin();
 }
 
-int SIGFOXClass::send(String mess)
-{
-  int len = mess.length();
-  return send((unsigned char*)mess.c_str(), len);
-}
-
-int SIGFOXClass::send(char mess[])
-{
-  int len = strlen(mess);
-  return send((unsigned char*)mess, len);
-}
-
-int SIGFOXClass::receive(String mess)
-{
-  int len = mess.length();
-  return receive((unsigned char*)mess.c_str(), len);
-}
-
-int SIGFOXClass::receive(char mess[])
-{
-  int len = strlen(mess);
-  return receive((unsigned char*)mess, len);
-}
-
-int SIGFOXClass::send(unsigned char mess[], int len)
+int SIGFOXClass::send(unsigned char mess[], int len, bool rx)
 {
   if (len == 0) return -1;
   status();
@@ -166,11 +142,20 @@ int SIGFOXClass::send(unsigned char mess[], int len)
   digitalWrite(chip_select_pin, LOW);
   delay(1);
   spi_port.beginTransaction(SPICONFIG);
-  spi_port.transfer(0x0D);
+  if (rx) {
+    spi_port.transfer(0x0E);
+  } else {
+    spi_port.transfer(0x0D);
+  }
   spi_port.endTransaction();
   delay(1);
   digitalWrite(chip_select_pin, HIGH);
   int ret = 99;
+
+  int timeout = 6000;
+  if (rx) {
+    timeout = 10000;
+  }
 
   if (!debugging) {
     LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
@@ -182,7 +167,7 @@ int SIGFOXClass::send(unsigned char mess[], int len)
     goto exit;
   }
 
-  for (i = 0; i < 6000; i++)
+  for (i = 0; i < timeout; i++)
   {
     if (digitalRead(interrupt_pin) == 0) {
       status();
@@ -196,8 +181,24 @@ int SIGFOXClass::send(unsigned char mess[], int len)
       delay(50);
     }
   }
+
 exit:
   if (ret == 99) sig = 13;
+
+  if (sig == 0 && rx) {
+    digitalWrite(chip_select_pin, LOW);
+    delay(1);
+    spi_port.beginTransaction(SPICONFIG);
+    spi_port.transfer(0x10);
+    spi_port.transfer(MAX_RX_BUF_LEN);
+    spi_port.transfer(rx_buffer, MAX_RX_BUF_LEN);
+    spi_port.endTransaction();
+    delay(1);
+    digitalWrite(chip_select_pin, HIGH);
+
+    rx_buf_len = MAX_RX_BUF_LEN;
+  }
+
   return sig;
 }
 
@@ -207,8 +208,8 @@ int SIGFOXClass::beginPacket() {
   return (ret ? 1 : 0);
 }
 
-int SIGFOXClass::endPacket() {
-  int ret = send(tx_buffer, tx_buffer_index);
+int SIGFOXClass::endPacket(bool rx) {
+  int ret = send(tx_buffer, tx_buffer_index, rx);
   // invalidate the buffer
   tx_buffer_index = -1;
   return ret;
@@ -246,82 +247,6 @@ int SIGFOXClass::read() {
 
 int SIGFOXClass::peek() {
   return rx_buffer[0];
-}
-
-int SIGFOXClass::receive(unsigned char mess[], int len)
-{
-  if (len == 0) return -1;
-  status();
-
-  digitalWrite(chip_select_pin, LOW);
-  delay(1);
-  spi_port.beginTransaction(SPICONFIG);
-  if (len > 12) len = 12;
-  int i = 0;
-
-  spi_port.transfer(0x07);
-  spi_port.transfer(len);
-  spi_port.transfer(mess, len);
-  spi_port.endTransaction();
-  delay(1);
-  digitalWrite(chip_select_pin, HIGH);
-
-  delay(5);
-  calibrateCrystal();
-  delay(5);
-
-  digitalWrite(chip_select_pin, LOW);
-  delay(1);
-  spi_port.beginTransaction(SPICONFIG);
-  spi_port.transfer(0x0E);
-  spi_port.endTransaction();
-  delay(1);
-  digitalWrite(chip_select_pin, HIGH);
-  int ret = 99;
-
-  if (!debugging) {
-    LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
-    LowPower.sleep(100000);
-    if (digitalRead(interrupt_pin) == 0) {
-      status();
-      ret = statusCode(SIGFOX);
-    }
-    goto exit_rec;
-  }
-
-  for (i = 0; i < 6000; i++)
-  {
-    if (digitalRead(interrupt_pin) == 0) {
-      status();
-      ret = statusCode(SIGFOX);
-      break;
-    }
-    else {
-      digitalWrite(led_pin, HIGH);
-      delay(50);
-      digitalWrite(led_pin, LOW);
-      delay(50);
-    }
-  }
-
-exit_rec:
-  if (ret == 99) {
-    sig = 13;
-  }
-  if (sig == 0) {
-    digitalWrite(chip_select_pin, LOW);
-    delay(1);
-    spi_port.beginTransaction(SPICONFIG);
-    spi_port.transfer(0x10);
-    spi_port.transfer(MAX_RX_BUF_LEN);
-    spi_port.transfer(rx_buffer, MAX_RX_BUF_LEN);
-    spi_port.endTransaction();
-    delay(1);
-    digitalWrite(chip_select_pin, HIGH);
-
-    rx_buf_len = MAX_RX_BUF_LEN;
-  }
-  return sig;
 }
 
 int SIGFOXClass::parsePacket() {
