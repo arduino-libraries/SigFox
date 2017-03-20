@@ -152,14 +152,14 @@ int SIGFOXClass::send(unsigned char mess[], int len, bool rx)
   digitalWrite(chip_select_pin, HIGH);
   int ret = 99;
 
-  int timeout = 6000;
+  int timeout = 10000;  //10 seconds
   if (rx) {
-    timeout = 10000;
+    timeout = 60000;    //60 seconds
   }
 
   if (!debugging) {
     LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
-    LowPower.sleep(10000);
+    LowPower.sleep(timeout);
     if (digitalRead(interrupt_pin) == 0) {
       status();
       ret = statusCode(SIGFOX);
@@ -167,7 +167,7 @@ int SIGFOXClass::send(unsigned char mess[], int len, bool rx)
     goto exit;
   }
 
-  for (i = 0; i < timeout; i++)
+  for (i = 0; i < timeout/10; i++)
   {
     if (digitalRead(interrupt_pin) == 0) {
       status();
