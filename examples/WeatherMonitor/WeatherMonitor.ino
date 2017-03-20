@@ -68,7 +68,9 @@ void setup() {
   }
 
   if (!SigFox.begin()) {
-    //something is really wrong, try rebooting
+    // Something is really wrong, try rebooting
+    // Reboot is useful if we are powering the board using an unreliable power source
+    // (eg. solar panels or other energy harvesting methods)
     reboot();
   }
 
