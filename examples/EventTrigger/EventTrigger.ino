@@ -21,8 +21,13 @@ volatile int alarm_source = 0;
 void setup() {
 
   if (debug == true) {
-    Serial.begin(115200);
-    while (!Serial) {}
+
+    // We are using Serial1 instead than Serial because we are going in standby
+    // and the USB port could get confused during wakeup. To read the debug prints,
+    // connect pins 13-14 (TX-RX) to a 3.3V USB-to-serial converter
+
+    Serial1.begin(115200);
+    while (!Serial1) {}
   }
 
   if (!SigFox.begin()) {
@@ -38,12 +43,12 @@ void setup() {
     SigFox.debug();
   }
 
-  // attach pin 1 and 2 to a switch and enable the interrupt on voltage falling event
-  pinMode(1, INPUT_PULLUP);
-  LowPower.attachInterruptWakeup(1, alarmEvent1, FALLING);
+  // attach pin 0 and 1 to a switch and enable the interrupt on voltage falling event
+  pinMode(0, INPUT_PULLUP);
+  LowPower.attachInterruptWakeup(0, alarmEvent1, FALLING);
 
-  pinMode(2, INPUT_PULLUP);
-  LowPower.attachInterruptWakeup(2, alarmEvent2, FALLING);
+  pinMode(1, INPUT_PULLUP);
+  LowPower.attachInterruptWakeup(1, alarmEvent2, FALLING);
 }
 
 void loop()
@@ -56,7 +61,7 @@ void loop()
   SigFox.begin();
 
   if (debug == true) {
-    Serial.println("Alarm event on sensor " + String(alarm_source));
+    Serial1.println("Alarm event on sensor " + String(alarm_source));
   }
   delay(100);
 
@@ -72,13 +77,13 @@ void loop()
 
   if (debug == true) {
     if (ret > 0) {
-      Serial.println("No transmission");
+      Serial1.println("No transmission");
     } else {
-      Serial.println("Transmission ok");
+      Serial1.println("Transmission ok");
     }
 
-    Serial.println(SigFox.status(SIGFOX));
-    Serial.println(SigFox.status(ATMEL));
+    Serial1.println(SigFox.status(SIGFOX));
+    Serial1.println(SigFox.status(ATMEL));
 
     // Loop forever if we are testing for a single event
     while (1) {};
