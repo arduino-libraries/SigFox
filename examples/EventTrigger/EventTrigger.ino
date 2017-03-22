@@ -65,7 +65,7 @@ void loop()
   }
   delay(100);
 
-  // 3 bytes (ALM) + 4 bytes (ID) + 1 byte (source) < 12 bytes
+  // 3 bytes (ALM) + 8 bytes (ID as String) + 1 byte (source) < 12 bytes
   String to_be_sent = "ALM" + SigFox.ID() +  String(alarm_source);
 
   SigFox.beginPacket();
