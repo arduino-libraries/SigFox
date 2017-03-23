@@ -130,7 +130,7 @@ void loop() {
   delay(100);
 
   // We can only read the module temperature before SigFox.end()
-  temperature = SigFox.temperatureInternal();
+  temperature = SigFox.internalTemperature();
   msg.moduleTemperature = convertoFloatToInt16(temperature, 60, -60);
 
   if (oneshot == true) {

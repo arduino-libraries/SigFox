@@ -129,7 +129,7 @@ class SIGFOXClass : public Stream
   */
   void reset();
 
-  float temperatureInternal();
+  float internalTemperature();
 
   /*
   *  Disable module

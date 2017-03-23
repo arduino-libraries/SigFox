@@ -18,7 +18,7 @@ send	KEYWORD2
 receive	KEYWORD2
 status	KEYWORD2
 setMode	KEYWORD2
-temperatureInternal	KEYWORD2
+internalTemperature	KEYWORD2
 reset	KEYWORD2
 AtmVersion	KEYWORD2
 SigVersion	KEYWORD2

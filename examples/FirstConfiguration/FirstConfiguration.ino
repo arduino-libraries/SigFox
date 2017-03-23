@@ -37,7 +37,7 @@ void setup() {
   Serial.println("");
 
   Serial.print("Module temperature: ");
-  Serial.println(SigFox.temperatureInternal());
+  Serial.println(SigFox.internalTemperature());
 
   Serial.println("Register your board on https://backend.sigfox.com/activate with provided ID and PAC");
 

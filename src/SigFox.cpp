@@ -366,7 +366,7 @@ void SIGFOXClass::status()
   delay(1);
 }
 
-float SIGFOXClass::temperatureInternal()
+float SIGFOXClass::internalTemperature()
 {
   digitalWrite(chip_select_pin, LOW);
   delay(1);
