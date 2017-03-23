@@ -44,13 +44,15 @@ const char str6[]  = "Get voltage/temperature error";
 const char str7[]  = "Close issues encountered";
 const char str8[]  = "API error indication";
 const char str9[]  = "Error getting PN9";
-const char str10[]  = "Error getting frequency";
-const char str11[]  = "Error building frame";
-const char str12[]  = " in delay routine";
-const char str13[] = "Timeout interrupt no transmission";
+const char str10[] = "Error getting frequency";
+const char str11[] = "Error building frame";
+const char str12[] = "Error in delay routine";
+const char str13[] = "Callback causes error";
+const char str14[] = "Timing error";
+const char str15[] = "Frequency error";
 
-const char * sigstr[14]  =        // SIGFOX message status
-{str0, str1, str2, str3, str4, str5, str6, str7, str8, str9, str10, str11, str12, str13};
+const char * sigstr[16]  =        // SIGFOX message status
+{str0, str1, str2, str3, str4, str5, str6, str7, str8, str9, str10, str11, str12, str13, str14, str15};
 
 #define SPICONFIG   SPISettings(100000UL, MSBFIRST, SPI_MODE0)
 
@@ -339,7 +341,7 @@ char* SIGFOXClass::getStatusAtm()
 
 char* SIGFOXClass::getStatusSig()
 {
-  if (sig > 12)
+  if (sig > 0xF)
   {
     snprintf((char*)buffer, BLEN, "Controller comm. error: %d", sig);
     return (char*)buffer;
