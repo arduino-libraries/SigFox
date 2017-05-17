@@ -82,6 +82,12 @@ class SIGFOXClass : public Stream
   template <typename T> inline size_t write(T val) {return write((uint8_t*)&val, sizeof(T));};
   using Print::write;
 
+  /*
+  * Send a single bit (0 | 1) over the Sigfox network
+  * Returns the status code from the Atmel Sigfox chipset
+  **/
+  int sendBit(bool value);
+
   //makes no sense in Sigfox world
   void flush() {};
 
