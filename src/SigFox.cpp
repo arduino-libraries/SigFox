@@ -122,6 +122,12 @@ int SIGFOXClass::begin(SPIClass& spi, int reset, int poweron, int interrupt, int
 int SIGFOXClass::send(unsigned char mess[], int len, bool rx)
 {
   if (len == 0) return -1;
+
+  if (rx == false && len == 1 && mess[0] < 2) {
+    //we can use send_bit command
+    return sendBit(mess[0]);
+  }
+
   status();
 
   digitalWrite(chip_select_pin, LOW);
@@ -203,6 +209,7 @@ exit:
 
   return sig;
 }
+
 int SIGFOXClass::sendBit(bool value){
   int ret;
   int i = 0;
@@ -245,6 +252,7 @@ int SIGFOXClass::sendBit(bool value){
   }
   return 99; //default
 }
+
 int SIGFOXClass::beginPacket() {
   bool ret = (tx_buffer_index == -1);
   tx_buffer_index = 0;
