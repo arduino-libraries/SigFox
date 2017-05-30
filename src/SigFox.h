@@ -145,6 +145,12 @@ class SIGFOXClass : public Stream
   int send(unsigned char mess[], int len = 12, bool rx = false);
 
   /*
+  * Send a single bit (0 | 1) over the Sigfox network
+  * Returns the status code from the Atmel Sigfox chipset
+  **/
+  int sendBit(bool value);
+
+  /*
   * Return atm status message
   */
   char* getStatusAtm();

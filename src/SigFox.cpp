@@ -122,6 +122,12 @@ int SIGFOXClass::begin(SPIClass& spi, int reset, int poweron, int interrupt, int
 int SIGFOXClass::send(unsigned char mess[], int len, bool rx)
 {
   if (len == 0) return -1;
+
+  if (rx == false && len == 1 && mess[0] < 2) {
+    //we can use send_bit command
+    return sendBit(mess[0]);
+  }
+
   status();
 
   digitalWrite(chip_select_pin, LOW);
@@ -202,6 +208,49 @@ exit:
   }
 
   return sig;
+}
+
+int SIGFOXClass::sendBit(bool value){
+  int ret;
+  int i = 0;
+  status();
+
+  digitalWrite(chip_select_pin, LOW);
+  delay(1);
+  spi_port.beginTransaction(SPICONFIG);
+
+  spi_port.transfer(0x0B);
+  spi_port.transfer(value ? 1 : 0);
+  spi_port.endTransaction();
+  delay(1);
+  digitalWrite(chip_select_pin, HIGH);
+
+  int timeout = 7000;  //7 seconds
+
+  if (!debugging) {
+    LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
+    LowPower.sleep(timeout);
+    if (digitalRead(interrupt_pin) == 0) {
+      status();
+      return  statusCode(SIGFOX);
+    }
+  }
+
+  for (i = 0; i < timeout/10; i++)
+  {
+    if (digitalRead(interrupt_pin) == 0) {
+      status();
+      return statusCode(SIGFOX);
+      break;
+    }
+    else {
+      digitalWrite(led_pin, HIGH);
+      delay(50);
+      digitalWrite(led_pin, LOW);
+      delay(50);
+    }
+  }
+  return 99; //default
 }
 
 int SIGFOXClass::beginPacket() {
