@@ -9,19 +9,19 @@
  Copyright (c) 2016 Arduino LLC
 
  This software is open source software and is not owned by Atmel;
- you can redistribute it and/or modify it under the terms of the GNU 
- Lesser General Public License as published by the Free Software Foundation; 
+ you can redistribute it and/or modify it under the terms of the GNU
+ Lesser General Public License as published by the Free Software Foundation;
  either version 2.1 of the License, or (at your option) any later version.
 
- You acknowledge that the ArduinoUNO software is distributed to you free of 
- charge on an "as is" basis and that it has not been developed to meet your 
- specific requirements. It is supplied in the hope that it will be useful but 
+ You acknowledge that the ArduinoUNO software is distributed to you free of
+ charge on an "as is" basis and that it has not been developed to meet your
+ specific requirements. It is supplied in the hope that it will be useful but
  WITHOUT ANY WARRANTY that its use will be uninterrupted or error-free.
- All other conditions, warranties or other terms which might have effect 
- between the parties or be implied or incorporated into this licence or any 
- collateral contract whether by statute or otherwise are hereby excluded, 
- including the implied conditions, warranties or other terms as to 
- satisfactory quality, fitness for purpose, non-infringement or the use of 
+ All other conditions, warranties or other terms which might have effect
+ between the parties or be implied or incorporated into this licence or any
+ collateral contract whether by statute or otherwise are hereby excluded,
+ including the implied conditions, warranties or other terms as to
+ satisfactory quality, fitness for purpose, non-infringement or the use of
  reasonable skill and care.
  See the GNU Lesser General Public License for more details.
 */
@@ -100,7 +100,7 @@ class SIGFOXClass : public Stream
   void status();
   /*
   * Return status code.
-  * Type: 0 -> ssm status ; 1 -> atm status ; 2 -> sigfox status    
+  * Type: 0 -> ssm status ; 1 -> atm status ; 2 -> sigfox status
   */
   int statusCode(Protocol type);
   /*
@@ -188,7 +188,7 @@ class SIGFOXClass : public Stream
   unsigned char rx_buffer[MAX_RX_BUF_LEN];
   unsigned char tx_buffer[MAX_TX_BUF_LEN];
   int tx_buffer_index = -1;
-  SPIClass& spi_port = SPI;
+  SPIClass& spi_port = SIGFOX_SPI;            // TIJA: Was "SPI" and should have been SPI1. Leads to issues when SPI is also in use 
   int reset_pin;
   int poweron_pin;
   int interrupt_pin;
