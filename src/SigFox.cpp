@@ -166,8 +166,10 @@ int SIGFOXClass::send(unsigned char mess[], int len, bool rx)
   }
 
   if (!debugging) {
+#ifdef SIGFOX_SPI
     LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
     LowPower.sleep(timeout);
+#endif
     if (digitalRead(interrupt_pin) == 0) {
       status();
       ret = statusCode(SIGFOX);
@@ -228,8 +230,10 @@ int SIGFOXClass::sendBit(bool value){
   int timeout = 7000;  //7 seconds
 
   if (!debugging) {
+#ifdef SIGFOX_SPI
     LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
     LowPower.sleep(timeout);
+#endif
     if (digitalRead(interrupt_pin) == 0) {
       status();
       return  statusCode(SIGFOX);
