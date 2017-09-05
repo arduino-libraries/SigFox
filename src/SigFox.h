@@ -188,7 +188,7 @@ class SIGFOXClass : public Stream
   unsigned char rx_buffer[MAX_RX_BUF_LEN];
   unsigned char tx_buffer[MAX_TX_BUF_LEN];
   int tx_buffer_index = -1;
-  SPIClass& spi_port = SPI;
+  SPIClass *spi_port;
   int reset_pin;
   int poweron_pin;
   int interrupt_pin;
