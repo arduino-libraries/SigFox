@@ -121,7 +121,7 @@ int SIGFOXClass::begin(SPIClass& spi, int reset, int poweron, int interrupt, int
 
 int SIGFOXClass::send(unsigned char mess[], int len, bool rx)
 {
-  if (len == 0) return -1;
+  if (len == 0) return 98;
 
   if (rx == false && len == 1 && mess[0] < 2) {
     //we can use send_bit command
@@ -279,10 +279,17 @@ size_t SIGFOXClass::write(uint8_t val) {
 };
 
 size_t SIGFOXClass::write(const uint8_t *buffer, size_t size) {
-  if (tx_buffer_index >= 0 && tx_buffer_index + size < MAX_TX_BUF_LEN) {
-    memcpy(&tx_buffer[tx_buffer_index], buffer, size);
-    tx_buffer_index += size;
-    return size;
+  if (tx_buffer_index >= 0) {
+    if (tx_buffer_index + size < MAX_TX_BUF_LEN) {
+      memcpy(&tx_buffer[tx_buffer_index], buffer, size);
+      tx_buffer_index += size;
+      return size;
+    } else {
+      int len = MAX_TX_BUF_LEN - tx_buffer_index -1;
+      memcpy(&tx_buffer[tx_buffer_index], buffer, len);
+      tx_buffer_index += len;
+      return len;
+    }
   }
   return 0;
 }
