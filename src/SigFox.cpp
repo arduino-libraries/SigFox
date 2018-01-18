@@ -451,20 +451,17 @@ float SIGFOXClass::internalTemperature()
   digitalWrite(chip_select_pin, LOW);
   delay(1);
   spi_port->beginTransaction(SPICONFIG);
-  spi_port->transfer(0x13);
-  spi_port->transfer(0);
-  vlidle = spi_port->transfer(0);
-  vhidle = spi_port->transfer(0);
-  vlactive = spi_port->transfer(0);
-  vhactive = spi_port->transfer(0);
-  temperatureL = spi_port->transfer(0);
-  temperatureH = spi_port->transfer(0);
+  uint8_t buf[8];
+  buf[0] = 0x13;
+  spi_port->transfer(buf, 8);
+  temperatureL = buf[6];
+  temperatureH = buf[7];
   delay(1);
   spi_port->endTransaction();
   digitalWrite(chip_select_pin, HIGH);
   delay(1);
 
-  return float(temperatureH << 8 | temperatureL) / 10;
+  return (float((uint16_t)temperatureH << 8 | temperatureL) - 50.0f) / 10;
 }
 
 char* SIGFOXClass::readConfig(int* len)
