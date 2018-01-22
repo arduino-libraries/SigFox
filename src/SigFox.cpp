@@ -461,7 +461,7 @@ float SIGFOXClass::internalTemperature()
   digitalWrite(chip_select_pin, HIGH);
   delay(1);
 
-  return (float((uint16_t)temperatureH << 8 | temperatureL) - 50.0f) / 10;
+  return ((float)((int16_t)((uint16_t)temperatureH << 8 | temperatureL)) - 50.0f) / 10;
 }
 
 char* SIGFOXClass::readConfig(int* len)
