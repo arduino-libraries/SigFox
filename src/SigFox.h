@@ -98,6 +98,7 @@ class SIGFOXClass : public Stream
   * Read status (fill ssm,atm,sig status variables)
   */
   void status();
+  void status_without_delay();
   /*
   * Return status code.
   * Type: 0 -> ssm status ; 1 -> atm status ; 2 -> sigfox status    

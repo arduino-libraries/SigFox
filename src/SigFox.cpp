@@ -119,6 +119,10 @@ int SIGFOXClass::begin(SPIClass& spi, int reset, int poweron, int interrupt, int
   return begin();
 }
 
+void wakeUpRoutine() {
+  SigFox.status_without_delay();
+}
+
 int SIGFOXClass::send(unsigned char mess[], int len, bool rx)
 {
   if (len == 0) return 98;
@@ -160,39 +164,31 @@ int SIGFOXClass::send(unsigned char mess[], int len, bool rx)
   digitalWrite(chip_select_pin, HIGH);
   int ret = 99;
 
-  int timeout = 10000;  //10 seconds
-  if (rx) {
-    timeout = 60000;    //60 seconds
-  }
-
   if (!debugging) {
 #ifdef SIGFOX_SPI
-    LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
-    LowPower.sleep(timeout);
+    LowPower.attachInterruptWakeup(interrupt_pin, wakeUpRoutine, LOW);
+    LowPower.sleep();
+    delay(1);
+    detachInterrupt(interrupt_pin);
+    ret = statusCode(SIGFOX);
 #endif
-    if (digitalRead(interrupt_pin) == 0) {
-      status();
-      ret = statusCode(SIGFOX);
-    }
-    goto exit;
-  }
-
-  for (i = 0; i < timeout/10; i++)
-  {
-    if (digitalRead(interrupt_pin) == 0) {
-      status();
-      ret = statusCode(SIGFOX);
-      break;
-    }
-    else {
-      digitalWrite(led_pin, HIGH);
-      delay(50);
-      digitalWrite(led_pin, LOW);
-      delay(50);
+  } else {
+    while (true)
+    {
+      if (digitalRead(interrupt_pin) == 0) {
+        status();
+        ret = statusCode(SIGFOX);
+        break;
+      }
+      else {
+        digitalWrite(led_pin, HIGH);
+        delay(50);
+        digitalWrite(led_pin, LOW);
+        delay(50);
+      }
     }
   }
 
-exit:
   if (ret == 99) sig = 13;
 
   if (sig == 0 && rx) {
@@ -227,34 +223,30 @@ int SIGFOXClass::sendBit(bool value){
   delay(1);
   digitalWrite(chip_select_pin, HIGH);
 
-  int timeout = 7000;  //7 seconds
-
   if (!debugging) {
 #ifdef SIGFOX_SPI
-    LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
-    LowPower.sleep(timeout);
+    LowPower.attachInterruptWakeup(interrupt_pin, wakeUpRoutine, LOW);
+    LowPower.sleep();
+    delay(1);
+    detachInterrupt(interrupt_pin);
+    return statusCode(SIGFOX);
 #endif
-    if (digitalRead(interrupt_pin) == 0) {
-      status();
-      return  statusCode(SIGFOX);
+    return 13;
+  } else {
+    while (true)
+    {
+      if (digitalRead(interrupt_pin) == 0) {
+        status();
+        return statusCode(SIGFOX);
+      }
+      else {
+        digitalWrite(led_pin, HIGH);
+        delay(50);
+        digitalWrite(led_pin, LOW);
+        delay(50);
+      }
     }
   }
-
-  for (i = 0; i < timeout/10; i++)
-  {
-    if (digitalRead(interrupt_pin) == 0) {
-      status();
-      return statusCode(SIGFOX);
-      break;
-    }
-    else {
-      digitalWrite(led_pin, HIGH);
-      delay(50);
-      digitalWrite(led_pin, LOW);
-      delay(50);
-    }
-  }
-  return 99; //default
 }
 
 int SIGFOXClass::beginPacket() {
@@ -424,6 +416,20 @@ void SIGFOXClass::status()
   spi_port->endTransaction();
   digitalWrite(chip_select_pin, HIGH);
   delay(1);
+}
+
+void SIGFOXClass::status_without_delay()
+{
+  digitalWrite(chip_select_pin, LOW);
+  spi_port->beginTransaction(SPICONFIG);
+  spi_port->transfer(0x0A);
+  spi_port->transfer(0);
+  ssm = spi_port->transfer(0);
+  atm = spi_port->transfer(0);
+  sig = spi_port->transfer(0);
+  sig2 = spi_port->transfer(0);
+  spi_port->endTransaction();
+  digitalWrite(chip_select_pin, HIGH);
 }
 
 float SIGFOXClass::internalTemperature()
