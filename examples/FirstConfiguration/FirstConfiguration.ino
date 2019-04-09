@@ -40,6 +40,8 @@ void setup() {
   Serial.println(SigFox.internalTemperature());
 
   Serial.println("Register your board on https://buy.sigfox.com/activate with provided ID and PAC");
+  Serial.println("/!\ The displayed PAC is the factory value. It is a throw-away value, which can only be used once for registration.")
+  Serial.println("If this device has already been registered, you can retrieve the updated PAC value on https://backend.sigfox.com/device/list");  
 
   delay(100);
 
