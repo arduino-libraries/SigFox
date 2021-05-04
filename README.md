@@ -1,5 +1,6 @@
 # SigFox Library
 
+[![Check Arduino status](https://github.com/arduino-libraries/SigFox/actions/workflows/check-arduino.yml/badge.svg)](https://github.com/arduino-libraries/SigFox/actions/workflows/check-arduino.yml)
 [![Spell Check status](https://github.com/arduino-libraries/SigFox/actions/workflows/spell-check.yml/badge.svg)](https://github.com/arduino-libraries/SigFox/actions/workflows/spell-check.yml)
 
 ## Description
