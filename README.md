@@ -1,5 +1,7 @@
 # SigFox Library
 
+[![Spell Check status](https://github.com/arduino-libraries/SigFox/actions/workflows/spell-check.yml/badge.svg)](https://github.com/arduino-libraries/SigFox/actions/workflows/spell-check.yml)
+
 ## Description
 
 This library allows you to use the ATMEL SigFox transceiver (ATAB8520E) on the Arduino MKRFOX1200 board. For additional information on the Arduino MKRFOX1200 board, see the [Getting Started page](https://www.arduino.cc/en/Guide/MKRFox1200) and the [product page](https://store.arduino.cc/usa/).
