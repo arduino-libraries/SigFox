@@ -1,7 +1,7 @@
 /*
   SigFox Simple Weather Station
 
-  This sketch demonstrates the usage of MKRFox1200 as a simple weather station.
+  This sketch demonstrates the usage of MKR Fox 1200 as a simple weather station.
   It uses
     the onboard temperature sensor
     HTU21D I2C sensor to get humidity
@@ -18,7 +18,7 @@
   we'll optimize the readings and send data in compact binary format
 
   This sketch shows how to use the Stream APIs of the library.
-  Refer to WeatherMonitor sketch for an example using data structures.
+  Refer to the WeatherMonitor sketch for an example using data structures.
 
   This example code is in the public domain.
 */
@@ -93,7 +93,7 @@ void setup() {
 void loop() {
   // Every 15 minutes, read all the sensors and send them
   // Let's try to optimize the data format
-  // Only use floats as intermediate representaion, don't send them directly
+  // Only use floats as intermediate representation, don't send them directly
 
   sensors_event_t event;
 
@@ -106,7 +106,7 @@ void loop() {
 
   // Start the module
   SigFox.begin();
-  // Wait at least 30ms after first configuration (100ms before)
+  // Wait at least 30 ms after first configuration (100 ms before)
   delay(100);
 
   // Prepare the packet using the Stream APIs

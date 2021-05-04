@@ -1,7 +1,7 @@
 /*
   SigFox Send Boolean tutorial
 
-  This sketch demonstrates how to send a simple binary data ( 0 or 1 ) using a MKRFox1200.
+  This sketch demonstrates how to send a simple binary data ( 0 or 1 ) using a MKR Fox 1200.
   If the application only needs to send one bit of information the transmission time
   (and thus power consumption) will be much lower than sending a full 12 bytes packet.
 
@@ -10,7 +10,7 @@
 
 #include <SigFox.h>
 
-// We want to send a boolean value to signal a binary event
+// We want to send a Boolean value to signal a binary event
 // like open/close or on/off
 
 bool value_to_send = true;
@@ -24,7 +24,7 @@ void setup() {
     while (!Serial) {};
   }
 
-  // Initialize the SigFox module
+  // Initialize the Sigfox module
   if (!SigFox.begin()) {
     if (DEBUG){
       Serial.println("Sigfox module unavailable !");
@@ -32,7 +32,7 @@ void setup() {
     return;
   }
 
-  // If we wanto to debug the application, print the device ID to easily find it in the backend
+  // If we want to to debug the application, print the device ID to easily find it in the backend
   if (DEBUG){
     SigFox.debug();
     Serial.println("ID  = " + SigFox.ID());

@@ -1,10 +1,10 @@
 /*
   SigFox Event Trigger tutorial
 
-  This sketch demonstrates the usage of a MKRFox1200
+  This sketch demonstrates the usage of a MKR Fox 1200
   to build a battery-powered alarm sensor with email notifications
 
-  A couple of sensors (normally open) should we wired between pins 1 and 2 and GND.
+  A couple of sensors (normally open) should be wired between pins 1 and 2 and GND.
 
   This example code is in the public domain.
 */
@@ -22,9 +22,9 @@ void setup() {
 
   if (debug == true) {
 
-    // We are using Serial1 instead than Serial because we are going in standby
+    // We are using Serial1 instead of Serial because we are going into standby
     // and the USB port could get confused during wakeup. To read the debug prints,
-    // connect pins 13-14 (TX-RX) to a 3.3V USB-to-serial converter
+    // connect pins 13-14 (TX-RX) to a 3.3 V USB-to-serial converter
 
     Serial1.begin(115200);
     while (!Serial1) {}
