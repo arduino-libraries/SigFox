@@ -1,8 +1,12 @@
 # SigFox Library
 
+[![Check Arduino status](https://github.com/arduino-libraries/SigFox/actions/workflows/check-arduino.yml/badge.svg)](https://github.com/arduino-libraries/SigFox/actions/workflows/check-arduino.yml)
+[![Compile Examples status](https://github.com/arduino-libraries/SigFox/actions/workflows/compile-examples.yml/badge.svg)](https://github.com/arduino-libraries/SigFox/actions/workflows/compile-examples.yml)
+[![Spell Check status](https://github.com/arduino-libraries/SigFox/actions/workflows/spell-check.yml/badge.svg)](https://github.com/arduino-libraries/SigFox/actions/workflows/spell-check.yml)
+
 ## Description
 
-This library allows you to use the ATMEL SigFox transceiver (ATAB8520E) on the Arduino MKRFOX1200 board. For additional information on the Arduino MKRFOX1200 board, see the [Getting Started page](https://www.arduino.cc/en/Guide/MKRFox1200) and the [product page](https://store.arduino.cc/usa/).
+This library allows you to use the ATMEL SigFox transceiver (ATAB8520E) on the Arduino MKRFOX1200 board. For additional information on the Arduino MKR Fox 1200 board, see the [Getting Started page](https://www.arduino.cc/en/Guide/MKRFox1200) and the [product page](https://store.arduino.cc/arduino-mkr-fox-1200-1408).
 
 SigFox employs a cellular system that enables remote devices to connect using Ultra-Narrow Band (UNB) technology. It requires little energy, being termed Low-power Wide-area network (LPWAN).
 
@@ -14,7 +18,7 @@ SigFox employs a cellular system that enables remote devices to connect using Ul
 
 1. In the Arduino IDE, navigate to Sketch > Include Library > Manage Libraries
 1. Then the Library Manager will open and you will find a list of libraries that are already installed or ready for installation.
-1. Then search for EduIntro using the search bar.
+1. Then search for SigFox using the search bar.
 1. Click on the text area and then select the specific version and install it.
 
 ### Second Method
@@ -32,7 +36,7 @@ SigFox employs a cellular system that enables remote devices to connect using Ul
 
 - ### LPWAN
 
-    SigFox library requies Low Powered Wide Area Network. This technology connects low-bandwidth devices with low rate of bits over long ranges.
+    SigFox library requires Low Powered Wide Area Network. This technology connects low-bandwidth devices with low rate of bits over long ranges.
 
 - ### Good fit for small applications
 
@@ -76,7 +80,7 @@ There are many examples implemented where this library is used. You can find oth
 
 - ### Send Boolean
 
-    This sketch demonstrates how to send a simple binary data ( 0 or 1 ) using a MKRFox1200. If the application only needs to send one bit of information the transmission time (and thus power consumption) will be much lower than sending a full 12 bytes packet.
+    This sketch demonstrates how to send a simple binary data ( 0 or 1 ) using a MKR Fox 1200. If the application only needs to send one bit of information the transmission time (and thus power consumption) will be much lower than sending a full 12 bytes packet.
 
 ``` C++
 #include <SigFox.h>
@@ -137,7 +141,7 @@ The Library created and maintained by Arduino LLC
 
 Based on previous work by:
 
-- M. Faccihin
+- M. Facchin
 - N. Lesconnec
 - N. Barcucci
 
