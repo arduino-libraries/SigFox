@@ -31,7 +31,7 @@
 #include <Adafruit_TSL2561_U.h>
 #include "conversions.h"
 
-// Set oneshot to false to trigger continuous mode when you finisched setting up the whole flow
+// Set oneshot to false to trigger continuous mode when you finished setting up the whole flow
 int oneshot = true;
 
 Adafruit_BMP280  bmp;
