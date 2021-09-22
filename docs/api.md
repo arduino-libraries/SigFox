@@ -500,7 +500,7 @@ void setup() {
   String ID = SigFox.ID();
   String PAC = SigFox.PAC();
 
-  // Display module informations
+  // Display module information
   Serial.println("MKRFox1200 Sigfox first configuration");
   Serial.println("SigFox FW version " + version);
   Serial.println("ID  = " + ID);
