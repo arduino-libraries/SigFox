@@ -233,22 +233,22 @@ Bit4 to Bit1: Error code
 
 **SIGFOX**
 
-`0x00`: No error
-`0x01`: Manufacturer error
-`0x02`: ID or key error
-`0x03`: State machine error
-`0x04`: Frame size error
-`0x05`: Manufacturer send error
-`0x06`: Get voltage/temperature error
-`0x07`: Close issues encountered
-`0x08`: API error indication
-`0x09`: Error getting PN9
-`0x0A`: Error getting frequency
-`0x0B`: Error building frame
-`0x0C`: Error in delay routine
-`0x0D`: callback causes error
-`0x0E`: timing error
-`0x0F`: frequency error
+- `0x00`: No error
+- `0x01`: Manufacturer error
+- `0x02`: ID or key error
+- `0x03`: State machine error
+- `0x04`: Frame size error
+- `0x05`: Manufacturer send error
+- `0x06`: Get voltage/temperature error
+- `0x07`: Close issues encountered
+- `0x08`: API error indication
+- `0x09`: Error getting PN9
+- `0x0A`: Error getting frequency
+- `0x0B`: Error building frame
+- `0x0C`: Error in delay routine
+- `0x0D`: callback causes error
+- `0x0E`: timing error
+- `0x0F`: frequency error
 
 ### `SigFox.AtmVersion()`
 
