@@ -135,9 +135,11 @@ Called after writing SigFox data to the remote connection, completes the process
 
 ```
 SigFox.endPacket();
-Return
-Returns an int: 1 if the packet was sent successfully, 0 if there was an error
 ```
+
+#### Return
+Returns an int: 1 if the packet was sent successfully, 0 if there was an error
+
 
 #### Example
 
