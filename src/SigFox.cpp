@@ -107,7 +107,7 @@ int SIGFOXClass::begin()
   return true;
 }
 
-int SIGFOXClass::begin(SPIClass& spi, int reset, int poweron, int interrupt, int chip_select, int led)
+int SIGFOXClass::begin(SPIClassSAMD & spi, int reset, int poweron, int interrupt, int chip_select, int led)
 {
   spi_port = &spi;
   reset_pin = reset;

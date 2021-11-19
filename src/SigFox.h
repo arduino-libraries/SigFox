@@ -71,7 +71,7 @@ class SIGFOXClass : public Stream
     /*
   * Initialize module specifying SPI port and pins (ready to transmit)
   */
-  int begin(SPIClass& spi, int reset, int poweron, int interrupt, int chip_select, int led);
+  int begin(SPIClassSAMD & spi, int reset, int poweron, int interrupt, int chip_select, int led);
 
   // Stream compatibility (like UDP)
   int beginPacket();
@@ -188,7 +188,7 @@ class SIGFOXClass : public Stream
   unsigned char rx_buffer[MAX_RX_BUF_LEN];
   unsigned char tx_buffer[MAX_TX_BUF_LEN];
   int tx_buffer_index = -1;
-  SPIClass *spi_port;
+  SPIClassSAMD *spi_port;
   int reset_pin;
   int poweron_pin;
   int interrupt_pin;
