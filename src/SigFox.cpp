@@ -28,7 +28,7 @@
 
 
 #include "SigFox.h"
-#include "SPI.h"
+#include <SPI.h>
 
 #ifdef SIGFOX_SPI
 #include "ArduinoLowPower.h"
@@ -96,8 +96,6 @@ int SIGFOXClass::begin()
   delay(10);
   digitalWrite(reset_pin, HIGH);
   spi_port->begin();
-  spi_port->setDataMode(SPI_MODE0);
-  spi_port->setBitOrder(MSBFIRST);
 
   delay(100);
 
@@ -107,7 +105,7 @@ int SIGFOXClass::begin()
   return true;
 }
 
-int SIGFOXClass::begin(SPIClassSAMD & spi, int reset, int poweron, int interrupt, int chip_select, int led)
+int SIGFOXClass::begin(arduino::HardwareSPI & spi, int reset, int poweron, int interrupt, int chip_select, int led)
 {
   spi_port = &spi;
   reset_pin = reset;
@@ -171,8 +169,6 @@ int SIGFOXClass::send(unsigned char mess[], int len, bool rx)
     LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
     LowPower.sleep(timeout);
     spi_port->begin();
-    spi_port->setDataMode(SPI_MODE0);
-    spi_port->setBitOrder(MSBFIRST);
 #endif
     if (digitalRead(interrupt_pin) == 0) {
       status();
@@ -239,8 +235,6 @@ int SIGFOXClass::sendBit(bool value){
     LowPower.attachInterruptWakeup(interrupt_pin, NULL, FALLING);
     LowPower.sleep(timeout);
     spi_port->begin();
-    spi_port->setDataMode(SPI_MODE0);
-    spi_port->setBitOrder(MSBFIRST);
 #endif
     if (digitalRead(interrupt_pin) == 0) {
       status();
