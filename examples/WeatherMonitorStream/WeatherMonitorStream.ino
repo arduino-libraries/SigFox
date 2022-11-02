@@ -9,10 +9,10 @@
     TSL2561 Light Sensor to get luminosity
 
   Download the needed libraries from the following links
-  http://librarymanager/all#BMP280&Adafruit
-  http://librarymanager/all#HTU21D&Adafruit
-  http://librarymanager/all#TSL2561&Adafruit
-  http://librarymanager/all#adafruit&sensor&abstraction
+  http://librarymanager/All#BMP280&Adafruit
+  http://librarymanager/All#HTU21D&Adafruit
+  http://librarymanager/All#TSL2561&Adafruit
+  http://librarymanager/All#adafruit&sensor&abstraction
 
   Since the Sigfox network can send a maximum of 120 messages per day (depending on your plan)
   we'll optimize the readings and send data in compact binary format
