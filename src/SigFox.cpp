@@ -213,7 +213,6 @@ exit:
 }
 
 int SIGFOXClass::sendBit(bool value){
-  int ret;
   int i = 0;
   status();
 
