@@ -213,7 +213,6 @@ exit:
 }
 
 int SIGFOXClass::sendBit(bool value){
-  int ret;
   int i = 0;
   status();
 
@@ -379,7 +378,7 @@ char* SIGFOXClass::status(Protocol type)
 char* SIGFOXClass::getStatusAtm()
 {
   buffer[0] = '\0';
-  byte err = (atm & B0011110) >> 1;
+  byte err = (atm & 0b0011110) >> 1;
   char pa[10]; pa[0] = '\0';
   if (bitRead(atm, 0) == 1) strcpy(pa, "PA ON"); else strcpy(pa, "PA OFF");
   if (err > 0)
