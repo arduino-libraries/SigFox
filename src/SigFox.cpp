@@ -56,10 +56,11 @@ const char * sigstr[16]  =        // SIGFOX message status
 
 #define SPICONFIG   SPISettings(100000UL, MSBFIRST, SPI_MODE0)
 
-void SIGFOXClass::debug() {
+void SIGFOXClass::debug(bool ledOFF) {
   // Enables debug via LED and Serial prints
   // Also disables greedy sleep strategy
   debugging = true;
+  no_led = ledOFF;
   pinMode(led_pin, OUTPUT);
 }
 
@@ -185,9 +186,9 @@ int SIGFOXClass::send(unsigned char mess[], int len, bool rx)
       break;
     }
     else {
-      digitalWrite(led_pin, HIGH);
+      if(!no_led) digitalWrite(led_pin, HIGH);
       delay(50);
-      digitalWrite(led_pin, LOW);
+      if(!no_led) digitalWrite(led_pin, LOW);
       delay(50);
     }
   }
@@ -249,9 +250,9 @@ int SIGFOXClass::sendBit(bool value){
       break;
     }
     else {
-      digitalWrite(led_pin, HIGH);
+      if(!no_led) digitalWrite(led_pin, HIGH);
       delay(50);
-      digitalWrite(led_pin, LOW);
+      if(!no_led) digitalWrite(led_pin, LOW);
       delay(50);
     }
   }
@@ -336,9 +337,9 @@ int SIGFOXClass::calibrateCrystal() {
       break;
     }
     else {
-      digitalWrite(led_pin, HIGH);
+      if(!no_led) digitalWrite(led_pin, HIGH);
       delay(50);
-      digitalWrite(led_pin, LOW);
+      if(!no_led) digitalWrite(led_pin, LOW);
       delay(50);
     }
   }

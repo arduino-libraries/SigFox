@@ -36,6 +36,7 @@
 #define MAX_RX_BUF_LEN  8
 #define MAX_TX_BUF_LEN  13
 
+
 typedef enum country {
   US = 0 ,
   EU
@@ -59,7 +60,7 @@ class SIGFOXClass : public Stream
   /*
   * Enables debug LED and prints
   */
-  void debug();
+  void debug(bool ledOFF=false);
   /*
   * Disables debug LED and prints
   */
@@ -196,6 +197,7 @@ class SIGFOXClass : public Stream
   int led_pin;
   int rx_buf_len = 0;
   bool debugging = false;
+  bool no_led = false;
 };
 
 extern SIGFOXClass SigFox;
