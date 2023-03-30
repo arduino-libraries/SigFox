@@ -56,7 +56,7 @@ const char * sigstr[16]  =        // SIGFOX message status
 
 #define SPICONFIG   SPISettings(100000UL, MSBFIRST, SPI_MODE0)
 
-void SIGFOXClass::debug(bool ledOFF) {
+void SIGFOXClass::debug(bool const ledOFF) {
   // Enables debug via LED and Serial prints
   // Also disables greedy sleep strategy
   debugging = true;
