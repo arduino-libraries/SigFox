@@ -60,7 +60,7 @@ class SIGFOXClass : public Stream
   /*
   * Enables debug LED and prints
   */
-  void debug(bool ledOFF=false);
+  void debug(bool const ledOFF = false);
   /*
   * Disables debug LED and prints
   */
